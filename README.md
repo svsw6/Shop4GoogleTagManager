@@ -1,4 +1,4 @@
-# Shop4GoogleTagManager
+# Google Tag Manager
 
 Google-Tag-Manager-Integration für Shopware 6.7 mit vollständigem GA4-Enhanced-Ecommerce-dataLayer und Google Consent Mode v2.
 
