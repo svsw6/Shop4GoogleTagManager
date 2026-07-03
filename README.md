@@ -137,10 +137,6 @@ Kontaktformular- und Custom-Form-Tracking laufen **clientseitig** beim Absenden 
 - **Optimistisches `add_to_cart`:** Das client-seitige `add_to_cart`-Event wird bereits beim Absenden des Warenkorb-Formulars erfasst – also **bevor** der Server das Hinzufügen bestätigt hat. Schlägt der serverseitige Vorgang fehl (z. B. Bestand erschöpft), kann ein `add_to_cart` getrackt worden sein, das nicht zu einem Warenkorb-Eintrag führte. Die server-seitigen Events (`view_cart` etc.) überschneiden sich damit nicht. **Staffelpreise:** `price`/`value` des client-seitigen `add_to_cart` basieren auf dem im DOM hinterlegten Einzelpreis (Menge 1). Bei mengenabhängigen Staffelpreisen kann der getrackte Betrag daher vom tatsächlichen Warenkorbwert abweichen; die maßgeblichen server-seitigen Events (`view_cart`, `purchase`) verwenden die echten Preise.
 - **Reihenfolge der Nutzerdaten:** Die identifizierenden Nutzerdaten werden asynchron über `/s4gtm/user-data` nachgeladen und können daher **nach** den ersten Ecommerce-Events im `dataLayer` ankommen. Tags, die `user_id` schon beim ersten Event erwarten, sollten als GA4-User-Property gelesen werden (greift auf folgende Hits).
 
-## Content-Security-Policy (CSP)
-
-Die für Consent Mode v2 nötigen Inline-Scripts (Consent-Default, Basis-`dataLayer`) müssen **synchron vor** `gtm.js` laufen und sind daher bewusst inline. Setzt dein Shop eine strikte CSP ohne `unsafe-inline`, übernimmt das Plugin automatisch eine **Nonce**, sofern sie im Request-Attribut `csp_nonce` bereitsteht (z. B. über das NelmioSecurityBundle oder einen eigenen Kernel-Listener). Die Nonce wird sowohl auf die Inline-Scripts als auch auf das dynamisch nachgeladene Container-Script gesetzt. Ohne ein solches Attribut bleibt das Verhalten unverändert; pflege dann bei Bedarf Script-Hashes in deiner CSP.
-
 ## Externe Consent-Manager (CMP)
 
 Standardmäßig nutzt das Plugin den **nativen Shopware-Cookie-Consent-Manager**: Es ergänzt die Cookies in der Statistik-/Marketing-Gruppe und reagiert auf das Event `CookieConfiguration_Update`. Setzt du stattdessen einen externen CMP (Cookiebot, Usercentrics, Borlabs Cookie, Consentmanager o. Ä.) ein, werden die Shopware-eigenen Consent-Cookies nicht gesetzt – das Plugin würde den Container dann **nie laden**. Für diesen Fall gibt es eine dokumentierte Bridge, über die der externe CMP den Consent direkt an das Plugin meldet.
@@ -200,7 +196,7 @@ Zum Testen mit dem Google Tag Assistant öffnest du die Storefront aus der GTM-V
 
 ## Entwicklung
 
-Architektur (saubere Schichtung):
+Architektur:
 
 - `Core/Content/GtmEvent` – DAL-Entität für Custom-Events inkl. Many-to-Many zu Verkaufskanälen
 - `Service` – Konfiguration, Consent, dataLayer und die `Ecommerce`-Builder (reine Entity-zu-`DataLayerEvent`-Abbildung)
