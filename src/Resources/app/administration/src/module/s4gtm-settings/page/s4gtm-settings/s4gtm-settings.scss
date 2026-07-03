@@ -1,4 +1,10 @@
 .s4gtm-settings {
+  &__modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
   &__sales-channel {
     width: 240px;
     align-self: center;

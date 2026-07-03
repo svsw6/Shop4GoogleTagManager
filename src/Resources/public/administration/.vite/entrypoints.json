@@ -3,11 +3,11 @@
   "entryPoints": {
     "shop4-google-tag-manager": {
       "css": [
-        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-BsLV63WG.css"
+        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-CT4QnuOC.css"
       ],
       "dynamic": [],
       "js": [
-        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-CdNKZ8eG.js"
+        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-DTP34cBl.js"
       ],
       "legacy": false,
       "preload": []

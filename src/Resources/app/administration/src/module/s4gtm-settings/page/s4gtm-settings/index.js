@@ -186,6 +186,10 @@ Component.register('s4gtm-settings', {
             this.showConsentWarningModal = false;
         },
 
+        onConsentModalChange(isOpen) {
+            this.showConsentWarningModal = isOpen;
+        },
+
         performSave() {
             this.isLoading = true;
             this.isSaveSuccessful = false;

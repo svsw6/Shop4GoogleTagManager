@@ -24,17 +24,9 @@ Component.register('s4gtm-events', {
             standardOverrides: {},
             customEvents: null,
             activeContext: 'all',
-            page: 1,
-            limit: 25,
             editModel: null,
             editKind: 'custom',
         };
-    },
-
-    watch: {
-        activeContext() {
-            this.page = 1;
-        },
     },
 
     computed: {
@@ -44,6 +36,15 @@ Component.register('s4gtm-events', {
 
         contextTabs() {
             return ['all', ...CONTEXT_ORDER];
+        },
+
+        contextTabItems() {
+            return this.contextTabs.map((context) => ({
+                name: context,
+                label: context === 'all'
+                    ? this.$tc('s4gtm-settings.events.tabs.all')
+                    : this.$tc('s4gtm-settings.context.' + context),
+            }));
         },
 
         eventRows() {
@@ -98,11 +99,6 @@ Component.register('s4gtm-events', {
             }
 
             return rows;
-        },
-
-        pagedRows() {
-            const start = (this.page - 1) * this.limit;
-            return this.filteredRows.slice(start, start + this.limit);
         },
 
         eventColumns() {
@@ -162,11 +158,6 @@ Component.register('s4gtm-events', {
 
         onContextTab(context) {
             this.activeContext = context;
-        },
-
-        onPageChange({ page, limit }) {
-            this.page = page;
-            this.limit = limit;
         },
 
         onToggleActive(item, value) {

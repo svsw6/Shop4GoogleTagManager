@@ -165,30 +165,34 @@
         {% endblock %}
 
         {% block s4gtm_settings_consent_warning_modal %}
-            <sw-modal
-                    v-if="showConsentWarningModal"
-                    :title="$tc('s4gtm-settings.card.consent.requireConsentWarningTitle')"
-                    variant="small"
-                    @modal-close="onCancelConsentWarning">
-                <p class="s4gtm-settings__consent-modal-text">
-                    {{ $tc('s4gtm-settings.card.consent.confirmDisableConsent') }}
-                </p>
+            <mt-modal-root
+                    :is-open="showConsentWarningModal"
+                    @change="onConsentModalChange">
+                <mt-modal
+                        :title="$tc('s4gtm-settings.card.consent.requireConsentWarningTitle')"
+                        width="s">
+                    <p class="s4gtm-settings__consent-modal-text">
+                        {{ $tc('s4gtm-settings.card.consent.confirmDisableConsent') }}
+                    </p>
 
-                <template #modal-footer>
-                    <mt-button
-                            size="small"
-                            variant="secondary"
-                            @click="onCancelConsentWarning">
-                        {{ $tc('global.default.cancel') }}
-                    </mt-button>
-                    <mt-button
-                            size="small"
-                            variant="critical"
-                            @click="onConfirmSaveWithoutConsent">
-                        {{ $tc('s4gtm-settings.card.consent.confirmDisableConsentButton') }}
-                    </mt-button>
-                </template>
-            </sw-modal>
+                    <template #footer>
+                        <div class="s4gtm-settings__modal-footer">
+                            <mt-button
+                                    size="small"
+                                    variant="secondary"
+                                    @click="onCancelConsentWarning">
+                                {{ $tc('global.default.cancel') }}
+                            </mt-button>
+                            <mt-button
+                                    size="small"
+                                    variant="critical"
+                                    @click="onConfirmSaveWithoutConsent">
+                                {{ $tc('s4gtm-settings.card.consent.confirmDisableConsentButton') }}
+                            </mt-button>
+                        </div>
+                    </template>
+                </mt-modal>
+            </mt-modal-root>
         {% endblock %}
 
         {% block s4gtm_settings_card_advanced %}

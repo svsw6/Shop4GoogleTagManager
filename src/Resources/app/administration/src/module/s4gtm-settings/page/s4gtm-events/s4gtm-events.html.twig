@@ -19,26 +19,19 @@
                 </template>
 
                 {% block s4gtm_events_context_tabs %}
-                    <sw-tabs class="s4gtm-events__context-tabs" positionIdentifier="s4gtm-events-context" :defaultItem="activeContext">
-                        <template #default="{ active }">
-                            <sw-tabs-item
-                                    v-for="context in contextTabs"
-                                    :key="context"
-                                    :name="context"
-                                    :activeTab="activeContext"
-                                    @click="onContextTab(context)">
-                                <template v-if="context === 'all'">{{ $tc('s4gtm-settings.events.tabs.all') }}</template>
-                                <template v-else>{{ $tc('s4gtm-settings.context.' + context) }}</template>
-                            </sw-tabs-item>
-                        </template>
-                    </sw-tabs>
+                    <mt-tabs
+                            class="s4gtm-events__context-tabs"
+                            :items="contextTabItems"
+                            :default-item="activeContext"
+                            @new-item-active="onContextTab">
+                    </mt-tabs>
                 {% endblock %}
 
                 {% block s4gtm_events_grid %}
                     <sw-data-grid
                             v-if="customEvents"
                             class="s4gtm-events__grid"
-                            :dataSource="pagedRows"
+                            :dataSource="filteredRows"
                             :columns="eventColumns"
                             :showSelection="false"
                             :allowInlineEdit="false">
@@ -79,16 +72,6 @@
                                     @click="onDeleteEvent(item)">
                                 {{ $tc('s4gtm-settings.events.delete') }}
                             </sw-context-menu-item>
-                        </template>
-
-                        <template #pagination>
-                            <sw-pagination
-                                    :total="filteredRows.length"
-                                    :limit="limit"
-                                    :page="page"
-                                    :total-visible="7"
-                                    @page-change="onPageChange">
-                            </sw-pagination>
                         </template>
                     </sw-data-grid>
                 {% endblock %}
