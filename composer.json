@@ -1,7 +1,7 @@
 {
     "name": "shop4/google-tag-manager",
     "description": "Google Tag Manager Integration mit GA4 Enhanced Ecommerce, Consent Mode v2 und dataLayer fuer Shopware 6.7",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "type": "shopware-platform-plugin",
     "license": "AGPL-3.0-or-later",
     "authors": [
