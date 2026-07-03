@@ -1,0 +1,19 @@
+{% block s4gtm_inherit_switch %}
+    <sw-inherit-wrapper
+            class="s4gtm-inherit-switch"
+            :value="value"
+            :inherited-value="inheritedValue"
+            :has-parent="hasParent"
+            :label="label"
+            :help-text="helpText"
+            @update:value="$emit('update:value', $event)">
+        <template #content="{ currentValue, updateCurrentValue, isInherited }">
+            <mt-switch
+                    bordered
+                    :model-value="currentValue"
+                    :disabled="isInherited"
+                    @update:model-value="updateCurrentValue">
+            </mt-switch>
+        </template>
+    </sw-inherit-wrapper>
+{% endblock %}

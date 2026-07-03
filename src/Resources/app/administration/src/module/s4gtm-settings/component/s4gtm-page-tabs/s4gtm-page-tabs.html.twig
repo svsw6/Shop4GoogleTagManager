@@ -1,0 +1,19 @@
+{% block s4gtm_page_tabs %}
+    <sw-tabs class="s4gtm-page-tabs" positionIdentifier="s4gtm-settings-tabs">
+        <template #default="{ active }">
+            <sw-tabs-item
+                    class="s4gtm-page-tabs__configuration"
+                    :route="{ name: 's4gtm.settings.index.configuration' }"
+                    :activeTab="active">
+                {{ $tc('s4gtm-settings.tabs.configuration') }}
+            </sw-tabs-item>
+
+            <sw-tabs-item
+                    class="s4gtm-page-tabs__events"
+                    :route="{ name: 's4gtm.settings.index.events' }"
+                    :activeTab="active">
+                {{ $tc('s4gtm-settings.tabs.events') }}
+            </sw-tabs-item>
+        </template>
+    </sw-tabs>
+{% endblock %}

@@ -1,0 +1,28 @@
+.s4gtm-events {
+    &__name {
+        font-weight: 600;
+    }
+
+    &__grid {
+        .sw-data-grid__wrapper {
+            overflow: visible;
+            max-height: none;
+        }
+
+        .sw-data-grid__cell--active .sw-data-grid__cell-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    &__switch {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .mt-switch {
+            margin: 0;
+        }
+    }
+}

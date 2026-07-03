@@ -1,0 +1,18 @@
+{
+  "shop4Gtm": {
+    "cookie": {
+      "analytics": {
+        "name": "Google Analytics",
+        "description": "Creates pseudonymous statistics on how the shop is used (e.g. pages viewed) so we can improve it. Data is transmitted to Google."
+      },
+      "marketing": {
+        "name": "Google Ads",
+        "description": "Enables advertising and remarketing as well as measuring ad performance – also on other websites. Data is transmitted to Google."
+      },
+      "enhanced": {
+        "name": "Enhanced conversion tracking",
+        "description": "Sends Google encrypted (hashed) data to attribute purchases to ad campaigns more accurately. Data is transmitted to Google."
+      }
+    }
+  }
+}

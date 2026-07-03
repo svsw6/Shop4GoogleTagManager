@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/shop4googletagmanager/administration/",
+  "entryPoints": {
+    "shop4-google-tag-manager": {
+      "css": [
+        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-BsLV63WG.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/shop4googletagmanager/administration/assets/shop4-google-tag-manager-BGqw_QLN.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

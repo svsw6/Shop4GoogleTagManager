@@ -1,0 +1,315 @@
+{% block s4gtm_settings %}
+    <div class="s4gtm-settings">
+
+        {% block s4gtm_settings_smart_bar_actions %}
+            <teleport
+                    v-if="smartBarTarget"
+                    to=".s4gtm-settings-index__smart-bar-actions">
+                <sw-sales-channel-switch
+                        class="s4gtm-settings__sales-channel"
+                        @change-sales-channel-id="onSalesChannelChanged">
+                </sw-sales-channel-switch>
+
+                <mt-button
+                        class="s4gtm-settings__save-action"
+                        :isLoading="isLoading"
+                        variant="primary"
+                        @click="onSave">
+                    {{ $tc('s4gtm-settings.general.save') }}
+                </mt-button>
+            </teleport>
+        {% endblock %}
+
+        {% block s4gtm_settings_card_base %}
+            <mt-card
+                    :title="$tc('s4gtm-settings.card.base.title')"
+                    :isLoading="isLoading">
+                <sw-inherit-wrapper
+                        v-model:value="editConfig.containerId"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.containerId"
+                        :label="$tc('s4gtm-settings.card.base.containerId')"
+                        :help-text="$tc('s4gtm-settings.card.base.containerIdHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-text-field
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                :placeholder="'GTM-XXXXXXX'"
+                                :error="containerIdError"
+                                @update:model-value="updateCurrentValue">
+                        </mt-text-field>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <sw-inherit-wrapper
+                        v-model:value="editConfig.tagPosition"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.tagPosition"
+                        :label="$tc('s4gtm-settings.card.base.tagPosition')"
+                        :help-text="$tc('s4gtm-settings.card.base.tagPositionHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-select
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                :options="tagPositionOptions"
+                                @update:model-value="updateCurrentValue">
+                        </mt-select>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <sw-container columns="1fr 1fr" gap="0 20px">
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.active"
+                            :inherited-value="globalConfig.active"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.base.active')"
+                            :help-text="$tc('s4gtm-settings.card.base.activeHelp')">
+                    </s4gtm-inherit-switch>
+
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.debug"
+                            :inherited-value="globalConfig.debug"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.base.debug')"
+                            :help-text="$tc('s4gtm-settings.card.base.debugHelp')">
+                    </s4gtm-inherit-switch>
+                </sw-container>
+            </mt-card>
+        {% endblock %}
+
+        {% block s4gtm_settings_card_consent %}
+            <mt-card
+                    :title="$tc('s4gtm-settings.card.consent.title')"
+                    :isLoading="isLoading">
+                <sw-inherit-wrapper
+                        v-model:value="editConfig.consentSource"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.consentSource"
+                        :label="$tc('s4gtm-settings.card.consent.consentSource')"
+                        :help-text="$tc('s4gtm-settings.card.consent.consentSourceHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-select
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                :options="consentSourceOptions"
+                                @update:model-value="updateCurrentValue">
+                        </mt-select>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <sw-container columns="1fr 1fr" gap="0 20px">
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.consentMode"
+                            :inherited-value="globalConfig.consentMode"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.consent.consentMode')"
+                            :help-text="$tc('s4gtm-settings.card.consent.consentModeHelp')">
+                    </s4gtm-inherit-switch>
+
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.advancedConsentMode"
+                            :inherited-value="globalConfig.advancedConsentMode"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.consent.advancedConsentMode')"
+                            :help-text="$tc('s4gtm-settings.card.consent.advancedConsentModeHelp')">
+                    </s4gtm-inherit-switch>
+                </sw-container>
+
+                <sw-inherit-wrapper
+                        v-model:value="editConfig.consentWaitForUpdate"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.consentWaitForUpdate"
+                        :label="$tc('s4gtm-settings.card.consent.consentWaitForUpdate')"
+                        :help-text="$tc('s4gtm-settings.card.consent.consentWaitForUpdateHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-number-field
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                number-type="int"
+                                :min="0"
+                                :max="10000"
+                                :step="100"
+                                @update:model-value="updateCurrentValue">
+                        </mt-number-field>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <mt-banner
+                        v-if="consentUnmanaged"
+                        variant="critical"
+                        :closable="false"
+                        :title="$tc('s4gtm-settings.card.consent.requireConsentWarningTitle')"
+                        class="s4gtm-settings__consent-warning">
+                    {{ $tc('s4gtm-settings.card.consent.requireConsentWarning') }}
+                </mt-banner>
+
+                <mt-banner
+                        v-else-if="advancedConsentActive"
+                        variant="attention"
+                        :closable="false"
+                        :title="$tc('s4gtm-settings.card.consent.advancedConsentWarningTitle')"
+                        class="s4gtm-settings__consent-warning">
+                    {{ $tc('s4gtm-settings.card.consent.advancedConsentWarning') }}
+                </mt-banner>
+
+                {# externer cmp gewaehlt: die bridge oeffnet das consent-signal fuer jedes script auf der seite #}
+                <mt-banner
+                        v-if="externalCmpBridgeActive"
+                        variant="attention"
+                        :closable="false"
+                        :title="$tc('s4gtm-settings.card.consent.externalCmpBridgeWarningTitle')"
+                        class="s4gtm-settings__consent-warning">
+                    {{ $tc('s4gtm-settings.card.consent.externalCmpBridgeWarning') }}
+                </mt-banner>
+            </mt-card>
+        {% endblock %}
+
+        {% block s4gtm_settings_consent_warning_modal %}
+            <sw-modal
+                    v-if="showConsentWarningModal"
+                    :title="$tc('s4gtm-settings.card.consent.requireConsentWarningTitle')"
+                    variant="small"
+                    @modal-close="onCancelConsentWarning">
+                <p class="s4gtm-settings__consent-modal-text">
+                    {{ $tc('s4gtm-settings.card.consent.confirmDisableConsent') }}
+                </p>
+
+                <template #modal-footer>
+                    <mt-button
+                            size="small"
+                            variant="secondary"
+                            @click="onCancelConsentWarning">
+                        {{ $tc('global.default.cancel') }}
+                    </mt-button>
+                    <mt-button
+                            size="small"
+                            variant="critical"
+                            @click="onConfirmSaveWithoutConsent">
+                        {{ $tc('s4gtm-settings.card.consent.confirmDisableConsentButton') }}
+                    </mt-button>
+                </template>
+            </sw-modal>
+        {% endblock %}
+
+        {% block s4gtm_settings_card_advanced %}
+            <mt-card
+                    :title="$tc('s4gtm-settings.card.advanced.title')"
+                    :isLoading="isLoading">
+                <sw-container columns="1fr 1fr" gap="0 20px">
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.dataLayerEnabled"
+                            :inherited-value="globalConfig.dataLayerEnabled"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.dataLayer')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.dataLayerHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.enhancedEcommerce"
+                            :inherited-value="globalConfig.enhancedEcommerce"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.enhancedEcommerce')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.enhancedEcommerceHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.checkoutTracking"
+                            :inherited-value="globalConfig.checkoutTracking"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.checkoutTracking')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.checkoutTrackingHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.eagerCheckoutLoad"
+                            :inherited-value="globalConfig.eagerCheckoutLoad"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.eagerCheckoutLoad')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.eagerCheckoutLoadHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.remarketing"
+                            :inherited-value="globalConfig.remarketing"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.remarketing')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.remarketingHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.userIdTracking"
+                            :inherited-value="globalConfig.userIdTracking"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.userIdTracking')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.userIdTrackingHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.customerTracking"
+                            :inherited-value="globalConfig.customerTracking"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.customerTracking')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.customerTrackingHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.anonymizeSearchTerm"
+                            :inherited-value="globalConfig.anonymizeSearchTerm"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.advanced.anonymizeSearchTerm')"
+                            :help-text="$tc('s4gtm-settings.card.advanced.anonymizeSearchTermHelp')">
+                    </s4gtm-inherit-switch>
+                </sw-container>
+
+                <sw-inherit-wrapper
+                        v-model:value="editConfig.enhancedConversions"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.enhancedConversions"
+                        :label="$tc('s4gtm-settings.card.advanced.enhancedConversions')"
+                        :help-text="$tc('s4gtm-settings.card.advanced.enhancedConversionsHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-select
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                :options="enhancedConversionsOptions"
+                                @update:model-value="updateCurrentValue">
+                        </mt-select>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <mt-banner
+                        v-if="enhancedConversionsActive"
+                        variant="attention"
+                        :closable="false"
+                        :title="$tc('s4gtm-settings.card.advanced.enhancedConversionsWarningTitle')"
+                        class="s4gtm-settings__consent-warning">
+                    {{ $tc('s4gtm-settings.card.advanced.enhancedConversionsWarning') }}
+                </mt-banner>
+            </mt-card>
+        {% endblock %}
+
+        {% block s4gtm_settings_card_forms %}
+            <mt-card
+                    :title="$tc('s4gtm-settings.card.forms.title')"
+                    :isLoading="isLoading">
+                <sw-container columns="1fr 1fr" gap="0 20px">
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.trackContactForm"
+                            :inherited-value="globalConfig.trackContactForm"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.forms.contactForm')"
+                            :help-text="$tc('s4gtm-settings.card.forms.contactFormHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.trackNewsletter"
+                            :inherited-value="globalConfig.trackNewsletter"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.forms.newsletter')"
+                            :help-text="$tc('s4gtm-settings.card.forms.newsletterHelp')">
+                    </s4gtm-inherit-switch>
+                    <s4gtm-inherit-switch
+                            v-model:value="editConfig.trackCustomForms"
+                            :inherited-value="globalConfig.trackCustomForms"
+                            :has-parent="hasParent"
+                            :label="$tc('s4gtm-settings.card.forms.customForms')"
+                            :help-text="$tc('s4gtm-settings.card.forms.customFormsHelp')">
+                    </s4gtm-inherit-switch>
+                </sw-container>
+            </mt-card>
+        {% endblock %}
+
+    </div>
+{% endblock %}

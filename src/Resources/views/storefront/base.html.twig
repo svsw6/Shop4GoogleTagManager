@@ -1,0 +1,6 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_body_inner %}
+    {% sw_include '@Storefront/storefront/component/gtm/body.html.twig' %}
+    {{ parent() }}
+{% endblock %}

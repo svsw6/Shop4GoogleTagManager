@@ -1,0 +1,158 @@
+{
+    "sw-privileges": {
+        "permissions": {
+            "s4gtm_event": {
+                "label": "GTM Custom-Events"
+            }
+        }
+    },
+    "s4gtm-settings": {
+        "general": {
+            "mainMenuItemGeneral": "Google Tag Manager",
+            "description": "Konfiguration der Google-Tag-Manager-Integration",
+            "salesChannel": "Verkaufskanal",
+            "save": "Speichern",
+            "saveSuccess": "Die Konfiguration wurde gespeichert.",
+            "saveError": "Die Konfiguration konnte nicht gespeichert werden."
+        },
+        "tabs": {
+            "configuration": "Konfiguration",
+            "events": "Events"
+        },
+        "context": {
+            "product": "Produktdetailseite",
+            "listing": "Kategorie / Listing",
+            "search": "Suche",
+            "cart": "Warenkorb",
+            "checkout": "Checkout",
+            "purchase": "Kaufabschluss",
+            "account": "Konto",
+            "global": "Global (jede Seite)"
+        },
+        "card": {
+            "base": {
+                "title": "Grundkonfiguration",
+                "active": "Plugin aktiv",
+                "activeHelp": "Schaltet die gesamte GTM-Einbindung im gewählten Verkaufskanal an oder aus. Ist der Schalter aus, wird weder Container noch dataLayer ausgeliefert.",
+                "containerId": "GTM Container-ID",
+                "containerIdHelp": "Die Container-ID aus deinem Google-Tag-Manager-Konto im Format GTM-XXXXXXX. Du findest sie oben in der GTM-Oberfläche neben dem Container-Namen.",
+                "containerIdInvalid": "Die Container-ID muss dem Format GTM-XXXXXXX entsprechen.",
+                "tagPosition": "Tag-Position",
+                "tagPositionHelp": "Bestimmt, an welcher Stelle der GTM-Container-Code ausgegeben wird, wenn er automatisch lädt (Consent-Quelle 'Keine Cookies' oder Advanced Consent Mode): im <head> (Standard, von Google empfohlen) oder am Ende des <body>. Lädt der Container erst nach Einwilligung, wird er ohnehin dynamisch per JavaScript nachgeladen – die Position spielt dann keine Rolle.",
+                "tagPositionHead": "Im <head> (empfohlen)",
+                "tagPositionBody": "Im <body>",
+                "debug": "Debug-Modus",
+                "debugHelp": "Schreibt jeden dataLayer-Push und jedes Consent-Update in die Browser-Konsole (Präfix [s4gtm]). Reines Logging – das Lade- und Consent-Verhalten ist identisch zum Normalbetrieb (der Container lädt also weiterhin nur nach Einwilligung). Nur für die Entwicklung gedacht, im Live-Betrieb ausschalten."
+            },
+            "consent": {
+                "title": "Consent Management",
+                "consentSource": "Consent-Quelle",
+                "consentSourceHelp": "Bestimmt, woher die Einwilligung kommt und ob der Container vor der Zustimmung blockiert wird. 'Shopware-Cookie-Consent': der native Shopware-Banner gibt den Container frei (Standard, empfohlen). 'Externer CMP': ein externer Consent-Manager (Cookiebot, Usercentrics, Borlabs, ...) meldet die Einwilligung über die Bridge ('s4gtm:consent-update' bzw. window.s4gtm.setConsent()) – nur so wird der Container freigegeben. 'Keine Cookies': kein Consent-Management, der Container lädt sofort beim Seitenaufruf (Tracking ohne Einwilligung – in der EU regelmäßig unzulässig).",
+                "consentSourceShopware": "Shopware-Cookie-Consent",
+                "consentSourceCmp": "Externer CMP (Bridge)",
+                "consentSourceNone": "Keine Cookies (ungated)",
+                "consentMode": "Google Consent Mode v2",
+                "consentModeHelp": "Sendet Google die Einwilligungssignale (Consent Mode v2): standardmäßig stehen alle Tracking-Kategorien auf 'denied' und werden erst nach Zustimmung angehoben. Sollte aktiviert bleiben – nur mit diesen Signalen wirken die Consent-Bedingungen der Tags im Container (sonst können Tags trotz fehlender Einwilligung feuern). Wirkt nur, wenn die Consent-Quelle nicht 'Keine Cookies' ist.",
+                "advancedConsentMode": "Advanced Consent Mode (Pings vor Einwilligung)",
+                "advancedConsentModeHelp": "Lädt den GTM-Container bereits beim Seitenaufruf – mit auf 'denied' gesetzten Consent-Defaults. Lehnt der Besucher ab, sendet Google nur cookielose Pings (Einwilligungsstatus, Zeitstempel, URL, User-Agent, Conversion-Signale) für die Conversion- und Verhaltensmodellierung; es werden keine Cookies gesetzt und keine identifizierenden Kundendaten übertragen. Wirkt nur, wenn 'Google Consent Mode v2' an ist und die Consent-Quelle nicht 'Keine Cookies' ist. Rechtlich umstritten: Die Einwilligungsfreiheit cookieloser Pings ist in der EU nicht abschließend geklärt – Einsatz auf eigene Verantwortung nach Rechtsprüfung. Standardmäßig aus.",
+                "consentWaitForUpdate": "Consent-Wartezeit (ms)",
+                "consentWaitForUpdateHelp": "Zeit in Millisekunden, die Google laut Consent Mode v2 nach dem Laden auf das Einwilligungs-Update wartet, bevor Tags ausgewertet werden (`wait_for_update`). Standard 500. Höhere Werte geben langsamen Consent-Bannern mehr Zeit, niedrigere lassen Tags früher feuern. **0** schaltet die Wartezeit ab. Im Checkout wird sie bei aktivem 'Im Checkout sofort laden' ohnehin auf 0 gesetzt, damit das `purchase`-Event nicht verzögert wird.",
+                "advancedConsentWarningTitle": "Container lädt vor der Einwilligung",
+                "advancedConsentWarning": "Advanced Consent Mode ist aktiv: Der GTM-Container lädt bereits vor der Einwilligung und Google erhält bei Ablehnung cookielose Modellierungs-Pings (ohne Cookies, ohne identifizierende Kundendaten). Das bringt Modellierungsvorteile, ist in der EU aber rechtlich umstritten. Setze die Option nur nach eigener Rechtsprüfung ein.",
+                "requireConsentWarningTitle": "Tracking ohne Einwilligung aktiv",
+                "requireConsentWarning": "Die Consent-Quelle steht auf 'Keine Cookies'. Der GTM-Container lädt dann sofort beim Seitenaufruf – also bevor der Besucher zugestimmt hat. In der EU ist das ohne vorherige Einwilligung regelmäßig unzulässig und kann zu Abmahnungen führen. Wähle 'Shopware-Cookie-Consent' oder 'Externer CMP', sofern du nicht aus gutem Grund (z. B. eigene Rechtsprüfung) anders entscheidest.",
+                "confirmDisableConsent": "Du speicherst mit der Consent-Quelle 'Keine Cookies'. Der GTM-Container lädt dann sofort beim Seitenaufruf, bevor der Besucher zugestimmt hat. In der EU ist das ohne Einwilligung regelmäßig unzulässig und liegt allein in deiner Verantwortung. Trotzdem speichern?",
+                "confirmDisableConsentButton": "Ohne Einwilligungspflicht speichern",
+                "externalCmpBridgeWarningTitle": "Consent-Signal für alle Seiten-Skripte geöffnet",
+                "externalCmpBridgeWarning": "Die Consent-Quelle 'Externer CMP' ist gewählt: Jedes auf der Seite ausgeführte Script kann über das DOM-Event 's4gtm:consent-update' bzw. window.s4gtm.setConsent() Einwilligung melden und den GTM-Container laden – einschließlich eingeschleuster Skripte. Wähle diese Quelle nur, wenn du tatsächlich einen externen CMP statt des Shopware-Banners einsetzt, und koppele die Bridge ausschließlich an dessen Consent-Callback."
+            },
+            "advanced": {
+                "title": "Erweiterte Optionen",
+                "dataLayer": "Data Layer aktivieren",
+                "dataLayerHelp": "Aktiviert die ereignisbezogenen dataLayer-Pushes (Produkt-, Listen-, Such- und Checkout-Events). Das Basis-dataLayer mit Shop-, Sprach- und Währungskontext sowie dem groben Login-Status wird unabhängig davon ausgegeben, solange das Plugin aktiv ist.",
+                "enhancedEcommerce": "Enhanced Ecommerce aktivieren",
+                "enhancedEcommerceHelp": "Schaltet die GA4-Ecommerce-Events für Produktansicht, Listen und Suche frei (view_item, view_item_list, search). Einzelne Events lassen sich im Tab 'Events' feinjustieren.",
+                "checkoutTracking": "Checkout-Tracking aktivieren",
+                "checkoutTrackingHelp": "Schaltet die Warenkorb- und Checkout-Events frei (view_cart, begin_checkout, add_shipping_info, add_payment_info, purchase).",
+                "eagerCheckoutLoad": "Im Checkout sofort laden",
+                "eagerCheckoutLoadHelp": "Lädt den GTM-Container auf Checkout-Seiten serverseitig sofort (inline) – aber nur, wenn bereits eine Einwilligung vorliegt (Consent-Cookie gesetzt). So feuert das purchase-Event ohne den Umweg über das Storefront-JS und geht auch bei schnellem Verlassen der Bestellabschluss-Seite nicht verloren. Checkout-Seiten sind nicht cachebar, daher ist das Cookie-Lesen hier sicher und lädt nie vor der Einwilligung. Ohne erteilte Einwilligung verhält es sich wie bisher (Laden erst nach Zustimmung). Standardmäßig aus.",
+                "remarketing": "Remarketing aktivieren",
+                "remarketingHelp": "Aktiviert die werbebezogenen Google-Signale (ad_storage, ad_personalization, ad_user_data – für Remarketing und erweitertes Conversion-Tracking) und blendet die zugehörigen Cookies im Consent-Banner ein. Ist die Option aus, werden diese Signale nie angehoben – selbst wenn die Marketing-Gruppe bestätigt wird. Greift nur nach Einwilligung in die Marketing-Cookies. Hinweis: Die Banner-Einträge folgen der globalen Einstellung (kanalübergreifend).",
+                "userIdTracking": "User-ID-Tracking aktivieren",
+                "userIdTrackingHelp": "Überträgt die pseudonyme Kunden-ID als GA4 user_id für geräteübergreifendes Tracking. Es werden keine Klardaten (Name, E-Mail) übertragen. Die ID gelangt erst nach erteilter Analytics-Einwilligung in den dataLayer.",
+                "customerTracking": "Kunden-Tracking aktivieren",
+                "customerTrackingHelp": "Ergänzt das dataLayer um Kunden-ID und Kundengruppe und erlaubt die Kunden-Events (login, logout, sign_up). Diese identifizierenden Daten gelangen erst nach erteilter Analytics-Einwilligung in den dataLayer; der grobe Login-Status (Gast/eingeloggt) steht unabhängig davon bereit.",
+                "anonymizeSearchTerm": "Suchbegriff anonymisieren",
+                "anonymizeSearchTermHelp": "Überträgt beim search-Event nicht den eingegebenen Suchbegriff (Feld search_term entfällt). Empfohlen aus Gründen der Datenminimierung, da Suchbegriffe personenbezogene Daten (z. B. Namen, E-Mail-Adressen) enthalten können. Die Suchergebnis-Items werden weiterhin übertragen.",
+                "enhancedConversions": "Enhanced Conversions",
+                "enhancedConversionsHelp": "Überträgt gehashte Kundendaten an Google für Enhanced Conversions – ausschließlich SHA-256-gehasht und erst NACH Einwilligung in 'ad_user_data' (Cookie für erweitertes Conversion-Tracking; benötigt aktives Remarketing bzw. die zugehörige Cookie-Gruppe). 'Nur E-Mail-Adresse': nur die gehashte E-Mail. 'Komplette Kundendaten': zusätzlich Telefon, Name und Adresse (alle gehasht). 'Deaktiviert': es werden keine Kundendaten übertragen (Standard). Rechtlich nur mit Einwilligung zulässig – in der Datenschutzerklärung ausweisen und Datenverarbeitungsbedingungen mit Google abschließen.",
+                "enhancedConversionsOff": "Deaktiviert",
+                "enhancedConversionsEmail": "Nur E-Mail-Adresse (gehasht)",
+                "enhancedConversionsFull": "Komplette Kundendaten (gehasht)",
+                "enhancedConversionsWarningTitle": "Übertragung gehashter Kundendaten aktiv",
+                "enhancedConversionsWarning": "Enhanced Conversions ist aktiv: Nach Einwilligung in 'ad_user_data' werden gehashte Kundendaten (E-Mail bzw. zusätzlich Telefon/Name/Adresse) an Google übertragen. Das ist nur mit gültiger Einwilligung zulässig – weise die Verarbeitung in der Datenschutzerklärung aus und schließe die Datenverarbeitungsbedingungen mit Google ab. Benötigt die ad_user_data-Cookie-Gruppe (Remarketing aktivieren)."
+            },
+            "forms": {
+                "title": "Formular-Tracking",
+                "contactForm": "Kontaktformular tracken",
+                "contactFormHelp": "Sendet ein Event, sobald das Shopware-Kontaktformular erfolgreich abgeschickt wurde.",
+                "newsletter": "Newsletter-Anmeldung tracken",
+                "newsletterHelp": "Sendet das Event newsletter_signup nach bestätigter Newsletter-Anmeldung (Double-Opt-in).",
+                "customForms": "Individuelle Formulare tracken",
+                "customFormsHelp": "Aktiviert das Tracking eigener Formulare. Diese müssen separat als Custom-Event mit passendem Auslöser konfiguriert werden."
+            }
+        },
+        "events": {
+            "title": "Events",
+            "subtitle": "Standard- und Custom-Events nach Kontext. Standard-Events lassen sich ein-/ausschalten und anpassen, Custom-Events frei anlegen.",
+            "create": "Custom-Event hinzufügen",
+            "edit": "Bearbeiten",
+            "delete": "Löschen",
+            "deleteSuccess": "Das Event wurde gelöscht.",
+            "tabs": {
+                "all": "Alle"
+            },
+            "kind": {
+                "standard": "Standard",
+                "custom": "Custom"
+            },
+            "grid": {
+                "name": "Name",
+                "type": "Typ",
+                "context": "Kontext",
+                "ga4Event": "GA4-Event",
+                "active": "Aktiv"
+            },
+            "detail": {
+                "titleCustom": "Custom-Event",
+                "titleStandard": "Standard-Event bearbeiten",
+                "standardName": "Standard-Event",
+                "standardNameHelp": "Der interne Schlüssel dieses Standard-Events. Er ist fest und kann nicht geändert werden.",
+                "name": "Name",
+                "nameHelp": "Interner, sprechender Name für die Übersicht. Erscheint nicht im dataLayer.",
+                "namePlaceholder": "z. B. Promotion-Banner-View",
+                "context": "Kontext",
+                "contextHelp": "Bestimmt, auf welcher Seite das Event ausgelöst wird. 'Global' feuert auf jeder Seite.",
+                "ga4Event": "GA4-Event-Name",
+                "ga4EventHelp": "Der Event-Name, der in den dataLayer geschrieben und in GTM als Trigger genutzt wird (z. B. view_promotion).",
+                "ga4EventOverride": "GA4-Event-Name (Override)",
+                "ga4EventOverrideHelp": "Leer lassen, um den Standardnamen zu behalten. Nur ändern, wenn du das Event bewusst umbenennen willst – ein abweichender Name kann GA4-Standardberichte (z. B. Ecommerce) unterbrechen.",
+                "priority": "Priorität",
+                "priorityHelp": "Bestimmt die Reihenfolge, in der mehrere Events desselben Kontexts in den dataLayer geschrieben werden (kleiner Wert zuerst).",
+                "salesChannel": "Verkaufskanäle",
+                "salesChannelHelp": "Schränkt das Event auf die ausgewählten Verkaufskanäle ein. Ohne Auswahl gilt es für alle Kanäle.",
+                "salesChannelAll": "Alle Verkaufskanäle",
+                "active": "Aktiv",
+                "activeHelp": "Nur aktive Events werden in den dataLayer geschrieben.",
+                "payloadTitle": "dataLayer-Felder",
+                "payloadHint": "Hier hinterlegst du zusätzliche Felder, die zusammen mit dem Event in den dataLayer geschrieben werden. Jede Zeile ist ein Schlüssel/Wert-Paar: der Schlüssel ist der Parametername (wie er in GTM/GA4 ankommt), der Wert ein fester Text. Bei Standard-Events werden diese Felder zu den automatisch ermittelten Daten (z. B. items, value) hinzugefügt.",
+                "payloadExamples": "Beispiele: affiliation = Onlineshop · coupon = SOMMER10 · creative_name = Sommer-Banner · creative_slot = startseite_oben · promotion_id = P-2024-07. Werte sind statische Texte; dynamische Werte (z. B. aktueller Preis) liefern nur die Standard-Events automatisch.",
+                "payloadKey": "Schlüssel",
+                "payloadKeyPlaceholder": "z. B. coupon",
+                "payloadValue": "Wert",
+                "payloadValuePlaceholder": "z. B. SOMMER10",
+                "payloadAdd": "Feld hinzufügen"
+            }
+        }
+    }
+}

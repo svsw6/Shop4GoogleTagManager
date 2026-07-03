@@ -1,0 +1,55 @@
+{% if s4gtmConfig is defined and s4gtmConfig.operational %}
+
+    {% set s4gtmJsonFlags = constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') %}
+
+    {% set s4gtmEvents = [] %}
+    {% if page is defined and page.extensions.s4gtm is defined %}
+        {% set s4gtmEvents = page.extensions.s4gtm.serializedEvents %}
+    {% endif %}
+
+    {% if s4gtmGlobalEvents is defined and s4gtmGlobalEvents is not empty %}
+        {% set s4gtmEvents = s4gtmEvents|merge(s4gtmGlobalEvents) %}
+    {% endif %}
+
+    {% set s4gtmNonceAttr = (s4gtmCspNonce is defined and s4gtmCspNonce) ? (' nonce="' ~ s4gtmCspNonce ~ '"') : '' %}
+
+    {% if s4gtmConfig.sendsConsentSignals %}
+        <script{{ s4gtmNonceAttr|raw }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){ window.dataLayer.push(arguments); }
+            gtag('consent', 'default', {{ s4gtmConsentDefault|json_encode(s4gtmJsonFlags)|raw }});
+        </script>
+    {% endif %}
+
+    <script{{ s4gtmNonceAttr|raw }} data-s4gtm-bootstrap>
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({{ s4gtmBaseDataLayer|json_encode(s4gtmJsonFlags)|raw }});
+    </script>
+
+    {% if s4gtmContainerLoaded|default(false) and s4gtmConfig.tagInHead %}
+        {% sw_include '@Storefront/storefront/component/gtm/container-script.html.twig' %}
+    {% endif %}
+
+    <script type="application/json" data-s4gtm-data>
+        {{- {
+            containerId: s4gtmConfig.containerId,
+            currency: s4gtmBaseDataLayer.shop.currency,
+            debug: s4gtmConfig.debug,
+            consentManaged: s4gtmConfig.consentManaged,
+            sendConsentSignals: s4gtmConfig.sendsConsentSignals,
+            containerAutoLoaded: s4gtmContainerLoaded|default(false),
+            dataLayerEnabled: s4gtmConfig.dataLayerEnabled,
+            trackContactForm: s4gtmConfig.trackContactForm,
+            trackCustomForms: s4gtmConfig.trackCustomForms,
+            consentMapping: s4gtmConsentMapping,
+            clientEvents: s4gtmClientEvents|default({}),
+            userDataUrl: path('s4gtm.user-data'),
+            pendingEventsUrl: path('s4gtm.pending-events'),
+            hasPendingEvents: s4gtmHasPendingEvents|default(false),
+            externalCmpBridge: s4gtmConfig.externalCmp,
+            enhancedConversions: s4gtmConfig.enhancedConversions,
+            loginStatus: s4gtmBaseDataLayer.user.loginStatus,
+            events: s4gtmEvents
+        }|json_encode(s4gtmJsonFlags)|raw -}}
+    </script>
+{% endif %}

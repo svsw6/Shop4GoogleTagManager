@@ -1,0 +1,18 @@
+{
+  "shop4Gtm": {
+    "cookie": {
+      "analytics": {
+        "name": "Google Analytics",
+        "description": "Erstellt pseudonyme Statistiken darüber, wie der Shop genutzt wird (z. B. aufgerufene Seiten), damit wir ihn verbessern können. Dabei werden Daten an Google übertragen."
+      },
+      "marketing": {
+        "name": "Google Ads",
+        "description": "Ermöglicht Werbung und Remarketing sowie die Messung von Werbeerfolgen – auch auf anderen Websites. Dabei werden Daten an Google übertragen."
+      },
+      "enhanced": {
+        "name": "Erweitertes Conversion-Tracking",
+        "description": "Übermittelt Google verschlüsselte (gehashte) Angaben, um Käufe Werbekampagnen genauer zuzuordnen. Dabei werden Daten an Google übertragen."
+      }
+    }
+  }
+}

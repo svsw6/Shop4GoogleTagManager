@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/shop4-google-tag-manager-BGqw_QLN.js",
+    "name": "shop4-google-tag-manager",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/shop4-google-tag-manager-BsLV63WG.css"
+    ]
+  }
+}

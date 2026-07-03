@@ -1,0 +1,14 @@
+.s4gtm-settings {
+  &__sales-channel {
+    width: 240px;
+    align-self: center;
+    margin: 0;
+
+    .mt-field,
+    .sw-block-field,
+    .mt-select {
+      margin-bottom: 0;
+      margin-top: 0;
+    }
+  }
+}

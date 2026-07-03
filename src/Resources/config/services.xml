@@ -1,0 +1,136 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+
+        <service id="Shop4GoogleTagManager\Core\Content\GtmEvent\GtmEventDefinition">
+            <tag name="shopware.entity.definition" entity="s4gtm_event"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Core\Content\GtmEvent\Aggregate\GtmEventSalesChannel\GtmEventSalesChannelDefinition">
+            <tag name="shopware.entity.definition" entity="s4gtm_event_sales_channel"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\CustomEventService">
+            <argument type="service" id="s4gtm_event.repository"/>
+            <argument type="service" id="cache.object"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\GtmEventCacheSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\CustomEventService"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\StandardEventDecorator">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\PayloadValidator"/>
+
+        <service id="Shop4GoogleTagManager\Service\ConfigService">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\PayloadValidator"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\CookieProvider"
+                 decorates="Shopware\Storefront\Framework\Cookie\CookieProviderInterface">
+            <argument type="service" id="Shop4GoogleTagManager\Service\CookieProvider.inner"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\ConsentService">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\DataLayerService">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\PendingEventStore">
+            <argument type="service" id="request_stack"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\Ecommerce\ItemFactory"/>
+
+        <service id="Shop4GoogleTagManager\Service\Ecommerce\ManufacturerNameResolver">
+            <argument type="service" id="product_manufacturer.repository"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\Ecommerce\ProductDataBuilder">
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ItemFactory"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\Ecommerce\CartDataBuilder">
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ItemFactory"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ManufacturerNameResolver"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\Ecommerce\OrderDataBuilder">
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ItemFactory"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ManufacturerNameResolver"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Twig\GtmTwigExtension">
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ItemFactory"/>
+            <tag name="twig.extension"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Service\GtmRenderContextFactory">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConsentService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\DataLayerService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\CustomEventService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\PendingEventStore"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\StorefrontRenderSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\GtmRenderContextFactory"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\ProductPageSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\ProductDataBuilder"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\CustomEventService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\StandardEventDecorator"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\CheckoutPageSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\CartDataBuilder"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\Ecommerce\OrderDataBuilder"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\CustomEventService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\StandardEventDecorator"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Controller\UserDataController" public="true">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\DataLayerService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\PendingEventStore"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\GtmEventValidationSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\PayloadValidator"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="Shop4GoogleTagManager\Subscriber\CustomerSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\ConfigService"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\PendingEventStore"/>
+            <argument type="service" id="Shop4GoogleTagManager\Service\StandardEventDecorator"/>
+            <argument type="service" id="logger"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+    </services>
+</container>

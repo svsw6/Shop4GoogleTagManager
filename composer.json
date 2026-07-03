@@ -1,0 +1,47 @@
+{
+    "name": "shop4/google-tag-manager",
+    "description": "Google Tag Manager Integration mit GA4 Enhanced Ecommerce, Consent Mode v2 und dataLayer fuer Shopware 6.7",
+    "version": "1.0.8",
+    "type": "shopware-platform-plugin",
+    "license": "AGPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Shopventures eCommerce GmbH"
+        }
+    ],
+    "require": {
+        "php": ">=8.3",
+        "shopware/core": "~6.7.0",
+        "shopware/storefront": "~6.7.0",
+        "shopware/administration": "~6.7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "phpstan/phpstan": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Shop4GoogleTagManager\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Shop4GoogleTagManager\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "Shop4GoogleTagManager\\Shop4GoogleTagManager",
+        "label": {
+            "de-DE": "Google Tag Manager",
+            "en-GB": "Google Tag Manager"
+        },
+        "description": {
+            "de-DE": "Bindet den Google Tag Manager ein und liefert einen vollstaendigen GA4 dataLayer inklusive Consent Mode v2.",
+            "en-GB": "Integrates Google Tag Manager and provides a full GA4 dataLayer including Consent Mode v2."
+        },
+        "manufacturerLink": {
+            "de-DE": "https://www.shopventures.de",
+            "en-GB": "https://www.shopventures.de/en"
+        }
+    }
+}

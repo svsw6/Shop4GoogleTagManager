@@ -1,0 +1,36 @@
+.s4gtm-settings-index {
+    &__smart-bar-actions {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    &__title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    &__title-icon {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    &.sw-page__main-content-inner {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    &__content {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 16px 40px 40px;
+
+        @media screen and (max-width: 1360px) {
+            padding: 12px 15px 15px;
+        }
+    }
+}

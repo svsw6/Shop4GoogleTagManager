@@ -1,0 +1,109 @@
+{% block s4gtm_events %}
+    <div class="s4gtm-events">
+
+        {% block s4gtm_events_card %}
+            <mt-card
+                    :title="$tc('s4gtm-settings.events.title')"
+                    :subtitle="$tc('s4gtm-settings.events.subtitle')"
+                    :isLoading="isLoading">
+
+                <template #toolbar>
+                    <mt-button
+                            class="s4gtm-events__create-action"
+                            ghost
+                            variant="secondary"
+                            size="small"
+                            @click="onCreateEvent">
+                        {{ $tc('s4gtm-settings.events.create') }}
+                    </mt-button>
+                </template>
+
+                {% block s4gtm_events_context_tabs %}
+                    <sw-tabs class="s4gtm-events__context-tabs" positionIdentifier="s4gtm-events-context" :defaultItem="activeContext">
+                        <template #default="{ active }">
+                            <sw-tabs-item
+                                    v-for="context in contextTabs"
+                                    :key="context"
+                                    :name="context"
+                                    :activeTab="activeContext"
+                                    @click="onContextTab(context)">
+                                <template v-if="context === 'all'">{{ $tc('s4gtm-settings.events.tabs.all') }}</template>
+                                <template v-else>{{ $tc('s4gtm-settings.context.' + context) }}</template>
+                            </sw-tabs-item>
+                        </template>
+                    </sw-tabs>
+                {% endblock %}
+
+                {% block s4gtm_events_grid %}
+                    <sw-data-grid
+                            v-if="customEvents"
+                            class="s4gtm-events__grid"
+                            :dataSource="pagedRows"
+                            :columns="eventColumns"
+                            :showSelection="false"
+                            :allowInlineEdit="false">
+
+                        <template #column-name="{ item }">
+                            <span class="s4gtm-events__name">{{ item.name }}</span>
+                        </template>
+
+                        <template #column-kind="{ item }">
+                            <sw-label
+                                    size="small"
+                                    :variant="item.kind === 'custom' ? 'info' : 'neutral'"
+                                    appearance="pill">
+                                {{ $tc('s4gtm-settings.events.kind.' + item.kind) }}
+                            </sw-label>
+                        </template>
+
+                        <template #column-eventContext="{ item }">
+                            {{ $tc('s4gtm-settings.context.' + item.eventContext) }}
+                        </template>
+
+                        <template #column-active="{ item }">
+                            <div class="s4gtm-events__switch">
+                                <mt-switch
+                                        :model-value="item.active"
+                                        @update:model-value="onToggleActive(item, $event)">
+                                </mt-switch>
+                            </div>
+                        </template>
+
+                        <template #actions="{ item }">
+                            <sw-context-menu-item @click="onEditEvent(item)">
+                                {{ $tc('s4gtm-settings.events.edit') }}
+                            </sw-context-menu-item>
+                            <sw-context-menu-item
+                                    v-if="item.kind === 'custom'"
+                                    variant="danger"
+                                    @click="onDeleteEvent(item)">
+                                {{ $tc('s4gtm-settings.events.delete') }}
+                            </sw-context-menu-item>
+                        </template>
+
+                        <template #pagination>
+                            <sw-pagination
+                                    :total="filteredRows.length"
+                                    :limit="limit"
+                                    :page="page"
+                                    :total-visible="7"
+                                    @page-change="onPageChange">
+                            </sw-pagination>
+                        </template>
+                    </sw-data-grid>
+                {% endblock %}
+            </mt-card>
+        {% endblock %}
+
+        {% block s4gtm_events_detail_modal %}
+            <s4gtm-event-detail
+                    v-if="editModel"
+                    :model="editModel"
+                    :kind="editKind"
+                    @save="onModalSave"
+                    @close="onModalClose">
+            </s4gtm-event-detail>
+        {% endblock %}
+
+    </div>
+{% endblock %}

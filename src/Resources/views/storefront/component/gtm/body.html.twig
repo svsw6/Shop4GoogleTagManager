@@ -1,0 +1,4 @@
+
+{% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmContainerLoaded|default(false) and s4gtmConfig.tagInBody %}
+    {% sw_include '@Storefront/storefront/component/gtm/container-script.html.twig' %}
+{% endif %}

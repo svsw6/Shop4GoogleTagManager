@@ -1,0 +1,10 @@
+{% sw_extends '@Storefront/storefront/component/buy-widget/buy-widget.html.twig' %}
+
+{% block buy_widget %}
+    {{ parent() }}
+
+    {% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmConfig.dataLayerEnabled
+        and product is defined and product is not null %}
+        <data class="s4gtm-product-data" hidden data-s4gtm-item="{{ s4gtm_item_json(product) }}"></data>
+    {% endif %}
+{% endblock %}

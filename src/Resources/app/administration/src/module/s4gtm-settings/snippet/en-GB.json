@@ -1,0 +1,158 @@
+{
+    "sw-privileges": {
+        "permissions": {
+            "s4gtm_event": {
+                "label": "GTM custom events"
+            }
+        }
+    },
+    "s4gtm-settings": {
+        "general": {
+            "mainMenuItemGeneral": "Google Tag Manager",
+            "description": "Configuration of the Google Tag Manager integration",
+            "salesChannel": "Sales channel",
+            "save": "Save",
+            "saveSuccess": "The configuration has been saved.",
+            "saveError": "The configuration could not be saved."
+        },
+        "tabs": {
+            "configuration": "Configuration",
+            "events": "Events"
+        },
+        "context": {
+            "product": "Product detail page",
+            "listing": "Category / listing",
+            "search": "Search",
+            "cart": "Cart",
+            "checkout": "Checkout",
+            "purchase": "Purchase",
+            "account": "Account",
+            "global": "Global (every page)"
+        },
+        "card": {
+            "base": {
+                "title": "Basic configuration",
+                "active": "Plugin active",
+                "activeHelp": "Turns the whole GTM integration on or off for the selected sales channel. When off, neither the container nor the dataLayer is delivered.",
+                "containerId": "GTM container ID",
+                "containerIdHelp": "The container ID from your Google Tag Manager account in the format GTM-XXXXXXX. You find it at the top of the GTM interface next to the container name.",
+                "containerIdInvalid": "The container ID must match the format GTM-XXXXXXX.",
+                "tagPosition": "Tag position",
+                "tagPositionHelp": "Determines where the GTM container code is emitted when it loads automatically (consent source 'No cookies' or Advanced Consent Mode): in the <head> (default, recommended by Google) or at the end of the <body>. When the container loads only after consent, it is injected dynamically via JavaScript anyway – the position then does not matter.",
+                "tagPositionHead": "In the <head> (recommended)",
+                "tagPositionBody": "In the <body>",
+                "debug": "Debug mode",
+                "debugHelp": "Logs every dataLayer push and consent update to the browser console (prefix [s4gtm]). Pure logging – the loading and consent behaviour is identical to normal operation (so the container still loads only after consent). Intended for development only, turn off in production."
+            },
+            "consent": {
+                "title": "Consent management",
+                "consentSource": "Consent source",
+                "consentSourceHelp": "Determines where consent comes from and whether the container is blocked before consent. 'Shopware cookie consent': the native Shopware banner releases the container (default, recommended). 'External CMP': an external consent manager (Cookiebot, Usercentrics, Borlabs, ...) reports consent via the bridge ('s4gtm:consent-update' or window.s4gtm.setConsent()) – only then is the container released. 'No cookies': no consent management, the container loads immediately on page load (tracking without consent – generally not permitted in the EU).",
+                "consentSourceShopware": "Shopware cookie consent",
+                "consentSourceCmp": "External CMP (bridge)",
+                "consentSourceNone": "No cookies (ungated)",
+                "consentMode": "Google Consent Mode v2",
+                "consentModeHelp": "Sends Google the consent signals (Consent Mode v2): by default all tracking categories are 'denied' and are raised only after consent. Should stay enabled – only with these signals do the consent conditions of the container tags take effect (otherwise tags may fire despite missing consent). Only takes effect when the consent source is not 'No cookies'.",
+                "advancedConsentMode": "Advanced Consent Mode (pings before consent)",
+                "advancedConsentModeHelp": "Loads the GTM container already on page load – with consent defaults set to 'denied'. If the visitor declines, Google only receives cookieless pings (consent status, timestamp, URL, user agent, conversion signals) for conversion and behavioural modelling; no cookies are set and no identifying customer data is transmitted. Only takes effect when 'Google Consent Mode v2' is on and the consent source is not 'No cookies'. Legally contested: whether cookieless pings are consent-free is not conclusively settled in the EU – use at your own responsibility after a legal review. Disabled by default.",
+                "consentWaitForUpdate": "Consent wait time (ms)",
+                "consentWaitForUpdateHelp": "Time in milliseconds that Google waits for the consent update after loading before evaluating tags, per Consent Mode v2 (`wait_for_update`). Default 500. Higher values give slow consent banners more time, lower values let tags fire earlier. **0** disables the wait. In the checkout it is set to 0 anyway when 'Load immediately in checkout' is active, so the `purchase` event is not delayed.",
+                "advancedConsentWarningTitle": "Container loads before consent",
+                "advancedConsentWarning": "Advanced Consent Mode is active: the GTM container loads before consent and Google receives cookieless modelling pings on rejection (no cookies, no identifying customer data). This provides modelling benefits but is legally contested in the EU. Only use this option after your own legal review.",
+                "requireConsentWarningTitle": "Tracking without consent is active",
+                "requireConsentWarning": "The consent source is set to 'No cookies'. The GTM container then loads immediately on page load – before the visitor has given consent. In the EU this is generally not permitted without prior consent and may lead to legal warnings. Choose 'Shopware cookie consent' or 'External CMP' unless you have a deliberate reason (e.g. your own legal review) to decide otherwise.",
+                "confirmDisableConsent": "You are saving with the consent source set to 'No cookies'. The GTM container then loads immediately on page load, before the visitor has given consent. In the EU this is generally not permitted without consent and is solely your responsibility. Save anyway?",
+                "confirmDisableConsentButton": "Save without consent requirement",
+                "externalCmpBridgeWarningTitle": "Consent signalling opened to all page scripts",
+                "externalCmpBridgeWarning": "The consent source 'External CMP' is selected: any script running on the page can report consent via the DOM event 's4gtm:consent-update' or window.s4gtm.setConsent() and load the GTM container – including injected scripts. Only choose this source if you actually use an external CMP instead of the Shopware banner, and wire the bridge exclusively to that CMP's consent callback."
+            },
+            "advanced": {
+                "title": "Advanced options",
+                "dataLayer": "Enable data layer",
+                "dataLayerHelp": "Enables the event-based dataLayer pushes (product, listing, search and checkout events). The base dataLayer with shop, language and currency context plus the coarse login status is emitted regardless, as long as the plugin is active.",
+                "enhancedEcommerce": "Enable enhanced ecommerce",
+                "enhancedEcommerceHelp": "Enables the GA4 ecommerce events for product view, listings and search (view_item, view_item_list, search). Individual events can be fine-tuned in the 'Events' tab.",
+                "checkoutTracking": "Enable checkout tracking",
+                "checkoutTrackingHelp": "Enables the cart and checkout events (view_cart, begin_checkout, add_shipping_info, add_payment_info, purchase).",
+                "eagerCheckoutLoad": "Load immediately in checkout",
+                "eagerCheckoutLoadHelp": "Loads the GTM container server-side immediately (inline) on checkout pages – but only if consent has already been given (consent cookie set). This way the purchase event fires without the detour via the storefront JS and is not lost even if the order confirmation page is left quickly. Checkout pages are not cacheable, so reading the cookie is safe here and never loads before consent. Without consent it behaves as before (load only after consent). Disabled by default.",
+                "remarketing": "Enable remarketing",
+                "remarketingHelp": "Enables the advertising-related Google signals (ad_storage, ad_personalization, ad_user_data – for remarketing and enhanced conversion tracking) and shows the corresponding cookies in the consent banner. When off, these signals are never raised – even if the marketing group is accepted. Only takes effect after consent to the marketing cookies. Note: the banner entries follow the global setting (across all channels).",
+                "userIdTracking": "Enable user ID tracking",
+                "userIdTrackingHelp": "Sends the pseudonymous customer ID as GA4 user_id for cross-device tracking. No plain data (name, email) is transmitted. The ID only enters the dataLayer after analytics consent has been given.",
+                "customerTracking": "Enable customer tracking",
+                "customerTrackingHelp": "Adds customer ID and customer group to the dataLayer and enables the customer events (login, logout, sign_up). These identifying values only enter the dataLayer after analytics consent has been given; the coarse login status (guest/logged in) is available regardless.",
+                "anonymizeSearchTerm": "Anonymise search term",
+                "anonymizeSearchTermHelp": "Does not transmit the entered search term in the search event (the search_term field is omitted). Recommended for data minimisation, as search terms can contain personal data (e.g. names, email addresses). The search result items are still transmitted.",
+                "enhancedConversions": "Enhanced conversions",
+                "enhancedConversionsHelp": "Transmits hashed customer data to Google for enhanced conversions – SHA-256 hashed only and only AFTER consent to 'ad_user_data' (cookie for enhanced conversion tracking; requires active remarketing or the corresponding cookie group). 'Email only': just the hashed email address. 'Full customer data': additionally phone, name and address (all hashed). 'Disabled': no customer data is transmitted (default). Legally permitted only with consent – disclose the processing in your privacy policy and conclude the data processing terms with Google.",
+                "enhancedConversionsOff": "Disabled",
+                "enhancedConversionsEmail": "Email address only (hashed)",
+                "enhancedConversionsFull": "Full customer data (hashed)",
+                "enhancedConversionsWarningTitle": "Transmission of hashed customer data is active",
+                "enhancedConversionsWarning": "Enhanced conversions is active: after consent to 'ad_user_data', hashed customer data (email or additionally phone/name/address) is transmitted to Google. This is permitted only with valid consent – disclose the processing in your privacy policy and conclude the data processing terms with Google. Requires the ad_user_data cookie group (enable remarketing)."
+            },
+            "forms": {
+                "title": "Form tracking",
+                "contactForm": "Track contact form",
+                "contactFormHelp": "Sends an event once the Shopware contact form has been submitted successfully.",
+                "newsletter": "Track newsletter sign-up",
+                "newsletterHelp": "Sends the newsletter_signup event after a confirmed newsletter registration (double opt-in).",
+                "customForms": "Track custom forms",
+                "customFormsHelp": "Enables tracking of your own forms. These must be configured separately as a custom event with a matching trigger."
+            }
+        },
+        "events": {
+            "title": "Events",
+            "subtitle": "Standard and custom events grouped by context. Standard events can be toggled and adjusted, custom events created freely.",
+            "create": "Add custom event",
+            "edit": "Edit",
+            "delete": "Delete",
+            "deleteSuccess": "The event has been deleted.",
+            "tabs": {
+                "all": "All"
+            },
+            "kind": {
+                "standard": "Standard",
+                "custom": "Custom"
+            },
+            "grid": {
+                "name": "Name",
+                "type": "Type",
+                "context": "Context",
+                "ga4Event": "GA4 event",
+                "active": "Active"
+            },
+            "detail": {
+                "titleCustom": "Custom event",
+                "titleStandard": "Edit standard event",
+                "standardName": "Standard event",
+                "standardNameHelp": "The internal key of this standard event. It is fixed and cannot be changed.",
+                "name": "Name",
+                "nameHelp": "Internal, descriptive name for the overview. Does not appear in the dataLayer.",
+                "namePlaceholder": "e.g. promotion banner view",
+                "context": "Context",
+                "contextHelp": "Determines on which page the event fires. 'Global' fires on every page.",
+                "ga4Event": "GA4 event name",
+                "ga4EventHelp": "The event name written to the dataLayer and used as a trigger in GTM (e.g. view_promotion).",
+                "ga4EventOverride": "GA4 event name (override)",
+                "ga4EventOverrideHelp": "Leave empty to keep the default name. Only change it if you deliberately want to rename the event – a different name can break GA4 standard reports (e.g. ecommerce).",
+                "priority": "Priority",
+                "priorityHelp": "Determines the order in which multiple events of the same context are written to the dataLayer (lower value first).",
+                "salesChannel": "Sales channels",
+                "salesChannelHelp": "Limits the event to the selected sales channels. Without a selection it applies to all channels.",
+                "salesChannelAll": "All sales channels",
+                "active": "Active",
+                "activeHelp": "Only active events are written to the dataLayer.",
+                "payloadTitle": "dataLayer fields",
+                "payloadHint": "Here you define additional fields that are written to the dataLayer together with the event. Each row is a key/value pair: the key is the parameter name (as it arrives in GTM/GA4), the value a fixed text. For standard events these fields are added to the automatically collected data (e.g. items, value).",
+                "payloadExamples": "Examples: affiliation = Online store · coupon = SUMMER10 · creative_name = Summer banner · creative_slot = home_top · promotion_id = P-2024-07. Values are static text; dynamic values (e.g. the current price) are only provided automatically by the standard events.",
+                "payloadKey": "Key",
+                "payloadKeyPlaceholder": "e.g. coupon",
+                "payloadValue": "Value",
+                "payloadValuePlaceholder": "e.g. SUMMER10",
+                "payloadAdd": "Add field"
+            }
+        }
+    }
+}

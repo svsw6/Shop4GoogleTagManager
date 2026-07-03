@@ -1,0 +1,6 @@
+{% sw_extends '@Storefront/storefront/layout/meta.html.twig' %}
+
+{% block layout_head_inner %}
+    {% sw_include '@Storefront/storefront/component/gtm/head.html.twig' %}
+    {{ parent() }}
+{% endblock %}

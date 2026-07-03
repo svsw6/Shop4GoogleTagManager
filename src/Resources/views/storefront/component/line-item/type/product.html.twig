@@ -1,0 +1,17 @@
+{% sw_extends '@Storefront/storefront/component/line-item/type/product.html.twig' %}
+
+
+{% block component_line_item_type_product %}
+    {{ parent() }}
+
+    {% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmConfig.dataLayerEnabled
+        and lineItem is defined and lineItem is not null and lineItem.price is not null %}
+        {% set s4gtmCartItem = {
+            item_id: lineItem.payload.productNumber|default(lineItem.referencedId),
+            item_name: lineItem.label,
+            price: lineItem.price.unitPrice,
+            quantity: lineItem.quantity
+        } %}
+        <data class="s4gtm-cart-item-data" hidden data-s4gtm-item="{{ s4gtmCartItem|json_encode(constant('JSON_UNESCAPED_SLASHES') b-or constant('JSON_HEX_TAG') b-or constant('JSON_HEX_AMP') b-or constant('JSON_HEX_QUOT') b-or constant('JSON_HEX_APOS')) }}"></data>
+    {% endif %}
+{% endblock %}

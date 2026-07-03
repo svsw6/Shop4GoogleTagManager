@@ -1,0 +1,145 @@
+{% block s4gtm_event_detail %}
+    <mt-modal-root :is-open="isOpen" @change="onModalChange">
+        <mt-modal
+                class="s4gtm-event-detail"
+                width="l"
+                :title="isCustom ? $tc('s4gtm-settings.events.detail.titleCustom') : $tc('s4gtm-settings.events.detail.titleStandard')">
+
+        {% block s4gtm_event_detail_standard_info %}
+            <sw-container v-if="!isCustom" columns="1fr 1fr" gap="0 20px">
+                <mt-text-field
+                        :model-value="model.event"
+                        disabled
+                        :label="$tc('s4gtm-settings.events.detail.standardName')"
+                        :helpText="$tc('s4gtm-settings.events.detail.standardNameHelp')">
+                </mt-text-field>
+                <mt-text-field
+                        :model-value="$tc('s4gtm-settings.context.' + model.eventContext)"
+                        disabled
+                        :label="$tc('s4gtm-settings.events.detail.context')"
+                        :helpText="$tc('s4gtm-settings.events.detail.contextHelp')">
+                </mt-text-field>
+            </sw-container>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_name %}
+            <mt-text-field
+                    v-if="isCustom"
+                    v-model="model.technicalName"
+                    :label="$tc('s4gtm-settings.events.detail.name')"
+                    :placeholder="$tc('s4gtm-settings.events.detail.namePlaceholder')"
+                    :helpText="$tc('s4gtm-settings.events.detail.nameHelp')"
+                    required>
+            </mt-text-field>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_context %}
+            <mt-select
+                    v-if="isCustom"
+                    v-model="model.eventContext"
+                    :label="$tc('s4gtm-settings.events.detail.context')"
+                    :options="contextOptions"
+                    :helpText="$tc('s4gtm-settings.events.detail.contextHelp')"
+                    required>
+            </mt-select>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_ga4 %}
+            <mt-text-field
+                    v-model="model.ga4Event"
+                    :label="isCustom ? $tc('s4gtm-settings.events.detail.ga4Event') : $tc('s4gtm-settings.events.detail.ga4EventOverride')"
+                    :placeholder="ga4Placeholder"
+                    :helpText="isCustom ? $tc('s4gtm-settings.events.detail.ga4EventHelp') : $tc('s4gtm-settings.events.detail.ga4EventOverrideHelp')"
+                    :required="isCustom">
+            </mt-text-field>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_meta %}
+            <mt-number-field
+                    v-if="isCustom"
+                    v-model="model.priority"
+                    numberType="int"
+                    :label="$tc('s4gtm-settings.events.detail.priority')"
+                    :helpText="$tc('s4gtm-settings.events.detail.priorityHelp')">
+            </mt-number-field>
+
+            <sw-entity-multi-select
+                    v-if="isCustom && model.salesChannels"
+                    v-model:entityCollection="model.salesChannels"
+                    :label="$tc('s4gtm-settings.events.detail.salesChannel')"
+                    :placeholder="$tc('s4gtm-settings.events.detail.salesChannelAll')"
+                    :helpText="$tc('s4gtm-settings.events.detail.salesChannelHelp')">
+            </sw-entity-multi-select>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_active %}
+            <mt-switch
+                    bordered
+                    v-model="model.active"
+                    :label="$tc('s4gtm-settings.events.detail.active')"
+                    :helpText="$tc('s4gtm-settings.events.detail.activeHelp')">
+            </mt-switch>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_payload %}
+            <h4 class="s4gtm-event-detail__payload-title">
+                {{ $tc('s4gtm-settings.events.detail.payloadTitle') }}
+            </h4>
+            <p class="s4gtm-event-detail__payload-hint-text">
+                {{ $tc('s4gtm-settings.events.detail.payloadHint') }}
+            </p>
+            <mt-banner variant="info" class="s4gtm-event-detail__payload-examples">
+                {{ $tc('s4gtm-settings.events.detail.payloadExamples') }}
+            </mt-banner>
+
+            <sw-data-grid
+                    v-if="payloadRows.length"
+                    class="s4gtm-event-detail__payload-grid"
+                    :dataSource="payloadRows"
+                    :columns="[
+            { property: 'key', label: $tc('s4gtm-settings.events.detail.payloadKey') },
+            { property: 'value', label: $tc('s4gtm-settings.events.detail.payloadValue') }
+        ]"
+                    :showSelection="false"
+                    :showActions="true">
+
+                <template #column-key="{ item }">
+                    <mt-text-field v-model="item.key" size="small" :placeholder="$tc('s4gtm-settings.events.detail.payloadKeyPlaceholder')"></mt-text-field>
+                </template>
+                <template #column-value="{ item }">
+                    <mt-text-field v-model="item.value" size="small" :placeholder="$tc('s4gtm-settings.events.detail.payloadValuePlaceholder')"></mt-text-field>
+                </template>
+                <template #actions="{ item }">
+                    <sw-context-menu-item variant="danger" @click="onRemovePayloadRow(item)">
+                        {{ $tc('s4gtm-settings.events.delete') }}
+                    </sw-context-menu-item>
+                </template>
+            </sw-data-grid>
+
+            <mt-button
+                    class="s4gtm-event-detail__payload-add"
+                    variant="secondary"
+                    size="small"
+                    @click="onAddPayloadRow">
+                {{ $tc('s4gtm-settings.events.detail.payloadAdd') }}
+            </mt-button>
+        {% endblock %}
+
+        {% block s4gtm_event_detail_footer %}
+            <template #footer>
+                <mt-button variant="secondary" size="small" @click="onModalChange(false)">
+                    {{ $tc('global.default.cancel') }}
+                </mt-button>
+                <mt-button
+                        variant="primary"
+                        size="small"
+                        :disabled="!isValid"
+                        @click="onSave">
+                    {{ $tc('s4gtm-settings.general.save') }}
+                </mt-button>
+            </template>
+        {% endblock %}
+
+        </mt-modal>
+    </mt-modal-root>
+{% endblock %}
