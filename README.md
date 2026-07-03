@@ -20,7 +20,7 @@ Google-Tag-Manager-Integration für Shopware 6.7 mit vollständigem GA4-Enhanced
 - Formular-Events: `generate_lead` (Kontaktformular) und `form_submit` (CMS-/Plugin-Formulare) – clientseitig, **ohne** Übertragung von Formularfeld-Inhalten
 - Eigene **Custom-Events** je Seitenkontext, frei konfigurierbar und einzelnen Verkaufskanälen zuweisbar
 - Google Consent Mode v2 inklusive `ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`
-- Pro Verkaufskanal konfigurierbar mit Shopware-Standard-Vererbung 
+- Pro Verkaufskanal konfigurierbar
 - Debug-Modus mit Konsolen-Logging
 
 ## Installation
