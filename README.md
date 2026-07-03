@@ -141,16 +141,6 @@ Kontaktformular- und Custom-Form-Tracking laufen **clientseitig** beim Absenden 
 
 Die für Consent Mode v2 nötigen Inline-Scripts (Consent-Default, Basis-`dataLayer`) müssen **synchron vor** `gtm.js` laufen und sind daher bewusst inline. Setzt dein Shop eine strikte CSP ohne `unsafe-inline`, übernimmt das Plugin automatisch eine **Nonce**, sofern sie im Request-Attribut `csp_nonce` bereitsteht (z. B. über das NelmioSecurityBundle oder einen eigenen Kernel-Listener). Die Nonce wird sowohl auf die Inline-Scripts als auch auf das dynamisch nachgeladene Container-Script gesetzt. Ohne ein solches Attribut bleibt das Verhalten unverändert; pflege dann bei Bedarf Script-Hashes in deiner CSP.
 
-## Sicherheit des GTM-Containers (Supply Chain)
-
-Das Plugin lädt `gtm.js` dynamisch von Google – eine Subresource-Integrity-Prüfung (SRI) ist bei GTM technisch nicht möglich, da der Container-Inhalt veränderlich ist. Die eigentliche Angriffsfläche liegt damit **im Container selbst**: Wer Schreibrechte auf den GTM-Workspace hat, kann beliebiges JavaScript in deine Storefront einschleusen. Empfohlene Härtung auf Google-Seite:
-
-- **Zugriff minimieren:** Nur wenige Personen mit Veröffentlichungsrecht; 2FA auf allen Google-Konten erzwingen.
-- **Benutzerdefiniertes HTML einschränken:** In den Container-Einstellungen „Benutzerdefinierte HTML-Tags zulassen" nur aktiviert lassen, wenn wirklich benötigt; sonst deaktivieren.
-- **Berechtigungen prüfen:** Tag-Berechtigungen (z. B. `inject_script`) regelmäßig im Workspace reviewen; nur vertrauenswürdige Tag-Vorlagen aus der Community-Galerie verwenden.
-- **Versionierung nutzen:** Änderungen über Versionen/Umgebungen ausrollen und vor der Live-Schaltung in der Vorschau prüfen; Versionen erlauben ein schnelles Rollback.
-- **CSP:** Eine restriktive CSP (siehe oben) begrenzt zumindest, welche Ziele eingeschleuste Skripte erreichen können.
-
 ## Externe Consent-Manager (CMP)
 
 Standardmäßig nutzt das Plugin den **nativen Shopware-Cookie-Consent-Manager**: Es ergänzt die Cookies in der Statistik-/Marketing-Gruppe und reagiert auf das Event `CookieConfiguration_Update`. Setzt du stattdessen einen externen CMP (Cookiebot, Usercentrics, Borlabs Cookie, Consentmanager o. Ä.) ein, werden die Shopware-eigenen Consent-Cookies nicht gesetzt – das Plugin würde den Container dann **nie laden**. Für diesen Fall gibt es eine dokumentierte Bridge, über die der externe CMP den Consent direkt an das Plugin meldet.
