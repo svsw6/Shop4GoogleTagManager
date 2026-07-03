@@ -1,5 +1,7 @@
 # Google Tag Manager
 
+[🇩🇪 Deutsch](README.md) | [🇬🇧 English](README.en.md)
+
 Google-Tag-Manager-Integration für Shopware 6.7 mit vollständigem GA4-Enhanced-Ecommerce-dataLayer und Google Consent Mode v2.
 
 > ℹ️ Newsletter-Tracking erfolgt über das `newsletter_signup`-Event nach Double-Opt-in. Kontaktformular-Tracking (`generate_lead`) und das Tracking sonstiger Formulare (`form_submit`) sind clientseitig umgesetzt und übertragen dabei **keine Formularfeld-Inhalte** (siehe „Formular-Tracking").
