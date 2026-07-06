@@ -30,10 +30,6 @@ Google-Tag-Manager-Integration für Shopware 6.7 mit vollständigem GA4-Enhanced
 bin/console plugin:refresh
 bin/console plugin:install --activate Shop4GoogleTagManager
 bin/console cache:clear
-
-# administration und storefront neu bauen
-bin/build-administration.sh
-bin/build-storefront.sh
 ```
 
 ## Konfiguration
