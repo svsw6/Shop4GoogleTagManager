@@ -75,6 +75,32 @@ class CartDataBuilderTest extends TestCase
         static::assertSame('ACME', $eco['items'][0]['item_brand']);
     }
 
+    public function testValueExcludesPromotionDiscount(): void
+    {
+        $product = new LineItem('line-id', LineItem::PRODUCT_LINE_ITEM_TYPE, 'product-id', 2);
+        $product->setLabel('Testprodukt');
+        $product->setPayload(['productNumber' => 'SW-400']);
+        $product->setPrice(new CalculatedPrice(50.0, 100.0, new CalculatedTaxCollection(), new TaxRuleCollection(), 2));
+
+        $promotion = new LineItem('promo-id', LineItem::PROMOTION_LINE_ITEM_TYPE, 'promo-ref', 1);
+        $promotion->setLabel('Rabatt');
+        $promotion->setPayload(['code' => 'SOMMER10']);
+        $promotion->setPrice(new CalculatedPrice(-10.0, -10.0, new CalculatedTaxCollection(), new TaxRuleCollection(), 1));
+
+        $cart = $this->createMock(Cart::class);
+        $cart->method('getLineItems')->willReturn(new LineItemCollection([$product, $promotion]));
+
+        $resolver = $this->createMock(ManufacturerNameResolver::class);
+        $resolver->method('resolve')->willReturn([]);
+
+        $builder = new CartDataBuilder(new ItemFactory(), $resolver);
+        $eco = $builder->buildViewCart($cart, $this->context())->jsonSerialize()['ecommerce'];
+
+        // der rabatt-line-item selbst bleibt aus den items heraus, mindert aber den value
+        static::assertCount(1, $eco['items']);
+        static::assertSame(90.0, $eco['value']);
+    }
+
     private function builder(): CartDataBuilder
     {
         $resolver = $this->createMock(ManufacturerNameResolver::class);

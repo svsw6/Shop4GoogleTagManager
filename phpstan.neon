@@ -1,0 +1,10 @@
+parameters:
+    level: 5
+    paths:
+        - src
+        - tests
+    tmpDir: var/phpstan
+    # derselbe autoloader-lookup wie in den tests: funktioniert im shopware-baum
+    # (custom/plugins/...) genauso wie standalone nach "composer install"
+    bootstrapFiles:
+        - tests/TestBootstrap.php

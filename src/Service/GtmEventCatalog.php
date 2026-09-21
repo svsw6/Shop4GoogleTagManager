@@ -25,7 +25,9 @@ final class GtmEventCatalog
 
     public const STANDARD_EVENTS = [
         'view_item' => self::CONTEXT_PRODUCT,
+        'add_to_wishlist' => self::CONTEXT_PRODUCT,
         'view_item_list' => self::CONTEXT_LISTING,
+        'select_item' => self::CONTEXT_LISTING,
         'search' => self::CONTEXT_SEARCH,
         'add_to_cart' => self::CONTEXT_CART,
         'remove_from_cart' => self::CONTEXT_CART,
@@ -38,11 +40,24 @@ final class GtmEventCatalog
         'logout' => self::CONTEXT_ACCOUNT,
         'sign_up' => self::CONTEXT_ACCOUNT,
         'newsletter_signup' => self::CONTEXT_ACCOUNT,
+        'view_promotion' => self::CONTEXT_GLOBAL,
+        'select_promotion' => self::CONTEXT_GLOBAL,
+        'share' => self::CONTEXT_GLOBAL,
     ];
 
+    /**
+     * Events, die das Storefront-JS ausloest - deren Konfiguration (aktiv, GA4-Name, Payload)
+     * wandert deshalb in den Konfigurationsblock der Seite.
+     */
     public const CLIENT_EVENTS = [
         'add_to_cart',
         'remove_from_cart',
+        'view_cart',
+        'select_item',
+        'add_to_wishlist',
+        'view_promotion',
+        'select_promotion',
+        'share',
     ];
 
     public static function isValidCustomContext(string $context): bool

@@ -1,4 +1,15 @@
 
-{% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmContainerLoaded|default(false) and s4gtmConfig.tagInBody %}
-    {% sw_include '@Storefront/storefront/component/gtm/container-script.html.twig' %}
+{% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmContainerLoaded|default(false) %}
+    {% if s4gtmConfig.tagInBody %}
+        {% sw_include '@Storefront/storefront/component/gtm/container-script.html.twig' %}
+    {% endif %}
+
+    {# noscript-fallback nur, wenn der container ohnehin schon geladen werden darf.
+       ein iframe laesst sich nicht per javascript nachtraeglich einwilligungsabhaengig
+       zurueckhalten - bei aktivem hard-block darf es ihn deshalb nicht geben. #}
+    <noscript>
+        <iframe src="{{ s4gtmConfig.gtmOrigin }}/ns.html?id={{ s4gtmConfig.containerId|e('html_attr') }}"
+                height="0" width="0" style="display:none;visibility:hidden"
+                title="Google Tag Manager"></iframe>
+    </noscript>
 {% endif %}

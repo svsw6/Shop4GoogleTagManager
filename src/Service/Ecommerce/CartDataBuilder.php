@@ -25,7 +25,7 @@ class CartDataBuilder
         return new DataLayerEvent('view_cart', [
             'ecommerce' => [
                 'currency' => $context->getCurrency()->getIsoCode(),
-                'value' => $this->itemsValue($items),
+                'value' => $this->netValue($cart, $items),
                 'items' => $this->mapItems($items, $context),
             ],
         ]);
@@ -38,7 +38,7 @@ class CartDataBuilder
         return new DataLayerEvent('begin_checkout', [
             'ecommerce' => [
                 'currency' => $context->getCurrency()->getIsoCode(),
-                'value' => $this->itemsValue($items),
+                'value' => $this->netValue($cart, $items),
                 'items' => $this->mapItems($items, $context),
             ],
         ]);
@@ -51,7 +51,7 @@ class CartDataBuilder
         return new DataLayerEvent('add_shipping_info', [
             'ecommerce' => [
                 'currency' => $context->getCurrency()->getIsoCode(),
-                'value' => $this->itemsValue($items),
+                'value' => $this->netValue($cart, $items),
                 'shipping_tier' => $context->getShippingMethod()->getTranslation('name')
                     ?? $context->getShippingMethod()->getName(),
                 'items' => $this->mapItems($items, $context),
@@ -66,7 +66,7 @@ class CartDataBuilder
         return new DataLayerEvent('add_payment_info', [
             'ecommerce' => [
                 'currency' => $context->getCurrency()->getIsoCode(),
-                'value' => $this->itemsValue($items),
+                'value' => $this->netValue($cart, $items),
                 'payment_type' => $context->getPaymentMethod()->getTranslation('name')
                     ?? $context->getPaymentMethod()->getName(),
                 'items' => $this->mapItems($items, $context),
@@ -84,6 +84,28 @@ class CartDataBuilder
         }
 
         return $items;
+    }
+
+    /**
+     * GA4-Umsatz der Positionen abzueglich der Rabatt-Positionen. Shopware laesst die
+     * Produktpreise bei Aktionen unveraendert und bucht den Nachlass als eigene
+     * promotion-Position - ohne diese Korrektur meldet GA4 zu hohen Umsatz.
+     */
+    private function netValue(Cart $cart, array $productLineItems): float
+    {
+        return $this->round(max(0.0, $this->itemsValue($productLineItems) + $this->discountTotal($cart)));
+    }
+
+    private function discountTotal(Cart $cart): float
+    {
+        $sum = 0.0;
+        foreach ($cart->getLineItems() as $lineItem) {
+            if ($lineItem->getType() === LineItem::PROMOTION_LINE_ITEM_TYPE) {
+                $sum += $lineItem->getPrice()?->getTotalPrice() ?? 0.0;
+            }
+        }
+
+        return $sum;
     }
 
     private function itemsValue(array $productLineItems): float

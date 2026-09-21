@@ -19,6 +19,9 @@ class PluginConfig extends Struct
     public const EC_FULL = 'full';
     public const EC_MODES = [self::EC_OFF, self::EC_EMAIL, self::EC_FULL];
     public const DEFAULT_WAIT_FOR_UPDATE = 500;
+    public const GOOGLE_TAG_ORIGIN = 'https://www.googletagmanager.com';
+    // eigener server-container: nur https, kein query/fragment, keine pfad-traversierung
+    public const SERVER_CONTAINER_URL_PATTERN = '/^https:\/\/[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d{1,5})?(\/[A-Za-z0-9._~-]+)*$/';
     public const MAX_WAIT_FOR_UPDATE = 10000;
 
     public function __construct(
@@ -39,10 +42,24 @@ class PluginConfig extends Struct
         public readonly bool $advancedConsentMode = false,
         public readonly string $tagPosition = self::POSITION_HEAD,
         public readonly string $enhancedConversions = self::EC_OFF,
-        public readonly bool $anonymizeSearchTerm = true,
+        public readonly bool $anonymizeSearchTerm = false,
         public readonly bool $eagerCheckoutLoad = false,
         public readonly int $consentWaitForUpdate = self::DEFAULT_WAIT_FOR_UPDATE,
+        public readonly string $serverContainerUrl = '',
     ) {
+    }
+
+    /**
+     * Herkunft von gtm.js und ns.html - entweder Google oder der eigene Server-Container.
+     */
+    public function gtmOrigin(): string
+    {
+        return $this->serverContainerUrl !== '' ? $this->serverContainerUrl : self::GOOGLE_TAG_ORIGIN;
+    }
+
+    public function usesServerContainer(): bool
+    {
+        return $this->serverContainerUrl !== '';
     }
 
     public function isOperational(): bool

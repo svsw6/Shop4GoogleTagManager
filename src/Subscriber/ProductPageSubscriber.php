@@ -119,15 +119,12 @@ class ProductPageSubscriber extends AbstractGtmPageSubscriber
 
             if ($this->isStandardEcommerceEvent('search', $salesChannelId)) {
                 $listing = $page->getListing();
-                $products = $listing !== null
-                    ? array_slice($listing->getElements(), 0, self::MAX_LIST_ITEMS)
-                    : [];
                 $extension->addEvent($this->standardEventDecorator->apply(
                     $this->productDataBuilder->buildSearch(
                         $page->getSearchTerm(),
-                        $products,
+                        array_slice($listing->getElements(), 0, self::MAX_LIST_ITEMS),
                         $context,
-                        $listing !== null ? $this->listingOffset($listing) : 0,
+                        $this->listingOffset($listing),
                         !$this->configService->getConfig($salesChannelId)->anonymizeSearchTerm,
                     ),
                     $salesChannelId,
@@ -152,8 +149,12 @@ class ProductPageSubscriber extends AbstractGtmPageSubscriber
             foreach ($section->getBlocks() ?? [] as $block) {
                 foreach ($block->getSlots() ?? [] as $slot) {
                     $data = $slot->getData();
-                    if ($data instanceof ProductListingStruct && $data->getListing() !== null) {
-                        return $data->getListing();
+                    if (!$data instanceof ProductListingStruct) {
+                        continue;
+                    }
+                    $listing = $data->getListing();
+                    if ($listing instanceof ProductListingResult) {
+                        return $listing;
                     }
                 }
             }
@@ -165,9 +166,8 @@ class ProductPageSubscriber extends AbstractGtmPageSubscriber
     private function listingOffset(ProductListingResult $listing): int
     {
         $limit = $listing->getLimit() ?? 0;
-        $page = $listing->getPage() ?? 1;
 
-        return ($page - 1) * $limit;
+        return ($listing->getPage() - 1) * $limit;
     }
 
     private function isStandardEcommerceEvent(string $event, string $salesChannelId): bool

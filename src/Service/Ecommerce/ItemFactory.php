@@ -10,9 +10,15 @@ class ItemFactory
 {
     use RoundsMonetaryValues;
 
-    public function fromProduct(SalesChannelProductEntity $product, int $quantity = 1, ?int $index = null): array
-    {
-        $unitPrice = $product->getCalculatedPrice()?->getUnitPrice() ?? 0.0;
+    public const MAX_CATEGORY_LEVELS = 5;
+
+    public function fromProduct(
+        SalesChannelProductEntity $product,
+        int $quantity = 1,
+        ?int $index = null,
+        ?string $rootCategoryId = null,
+    ): array {
+        $unitPrice = $product->getCalculatedPrice()->getUnitPrice();
         $item = [
             'item_id' => $product->getProductNumber(),
             'item_name' => $product->getTranslation('name') ?? $product->getName(),
@@ -26,9 +32,8 @@ class ItemFactory
             $item['item_brand'] = $brand;
         }
 
-        $category = $this->resolveCategoryName($product);
-        if ($category !== null) {
-            $item['item_category'] = $category;
+        foreach ($this->resolveCategoryPath($product, $rootCategoryId) as $level => $name) {
+            $item[$level === 0 ? 'item_category' : 'item_category' . ($level + 1)] = $name;
         }
 
         $variant = $this->resolveVariant($product);
@@ -36,7 +41,7 @@ class ItemFactory
             $item['item_variant'] = $variant;
         }
 
-        $listPrice = $product->getCalculatedPrice()?->getListPrice()?->getPrice();
+        $listPrice = $product->getCalculatedPrice()->getListPrice()?->getPrice();
         if ($listPrice !== null && $listPrice > $unitPrice) {
             $item['discount'] = $this->round($listPrice - $unitPrice);
         }
@@ -100,21 +105,43 @@ class ItemFactory
         return $item;
     }
 
-    private function resolveCategoryName(SalesChannelProductEntity $product): ?string
+    /**
+     * GA4 erwartet den Kategoriepfad von grob nach fein: item_category ist die oberste Ebene,
+     * item_category2 die naechste und so weiter (maximal fuenf).
+     *
+     * @return list<string>
+     */
+    private function resolveCategoryPath(SalesChannelProductEntity $product, ?string $rootCategoryId): array
     {
-        $seoCategory = $product->getSeoCategory();
-        if ($seoCategory !== null) {
-            return $seoCategory->getTranslation('name') ?? $seoCategory->getName();
+        $category = $product->getSeoCategory() ?? $product->getCategories()?->first();
+        if ($category === null) {
+            return [];
         }
 
-        $categories = $product->getCategories();
-        if ($categories !== null && $categories->count() > 0) {
-            $first = $categories->first();
+        $breadcrumb = $category->getPlainBreadcrumb();
+        if ($breadcrumb === []) {
+            $name = $category->getTranslation('name') ?? $category->getName();
 
-            return $first?->getTranslation('name') ?? $first?->getName();
+            return is_string($name) && $name !== '' ? [$name] : [];
         }
 
-        return null;
+        // alles oberhalb des verkaufskanal-einstiegs weglassen: diese ebenen sieht im shop niemand
+        if ($rootCategoryId !== null && \array_key_exists($rootCategoryId, $breadcrumb)) {
+            $breadcrumb = \array_slice($breadcrumb, array_search($rootCategoryId, array_keys($breadcrumb), true) + 1, null, true);
+        }
+
+        $path = [];
+        foreach ($breadcrumb as $name) {
+            if (!is_string($name) || $name === '') {
+                continue;
+            }
+            $path[] = $name;
+            if (\count($path) === self::MAX_CATEGORY_LEVELS) {
+                break;
+            }
+        }
+
+        return $path;
     }
 
     private function resolveVariant(SalesChannelProductEntity $product): ?string

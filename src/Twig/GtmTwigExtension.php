@@ -21,13 +21,16 @@ class GtmTwigExtension extends AbstractExtension
         ];
     }
 
-    public function renderItemJson(?SalesChannelProductEntity $product, int $quantity = 1): string
-    {
+    public function renderItemJson(
+        ?SalesChannelProductEntity $product,
+        int $quantity = 1,
+        ?string $rootCategoryId = null,
+    ): string {
         if ($product === null) {
             return '{}';
         }
 
-        $item = $this->itemFactory->fromProduct($product, $quantity);
+        $item = $this->itemFactory->fromProduct($product, $quantity, null, $rootCategoryId);
 
         return json_encode(
             $item,

@@ -1,1 +1,4 @@
 .phpunit.cache
+tests/js/node_modules
+var/
+docs/server-side-tagging-proxy.md

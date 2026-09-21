@@ -1,0 +1,12 @@
+{
+  "name": "shop4-google-tag-manager-storefront-tests",
+  "private": true,
+  "description": "jsdom-Integrationstests des gebauten Storefront-Bundles",
+  "scripts": {
+    "test": "node bundle-freshness.js && node storefront.test.js",
+    "stamp": "node bundle-freshness.js --stamp"
+  },
+  "devDependencies": {
+    "jsdom": "^26.0.0"
+  }
+}

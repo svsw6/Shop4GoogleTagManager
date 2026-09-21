@@ -14,7 +14,7 @@ class ProductDataBuilder
 
     public function buildViewItem(SalesChannelProductEntity $product, SalesChannelContext $context): DataLayerEvent
     {
-        $item = $this->itemFactory->fromProduct($product);
+        $item = $this->itemFactory->fromProduct($product, 1, null, $this->rootCategoryId($context));
 
         return new DataLayerEvent('view_item', [
             'ecommerce' => [
@@ -33,10 +33,11 @@ class ProductDataBuilder
         int $startIndex = 0,
         ?string $itemCategory = null,
     ): DataLayerEvent {
+        $rootCategoryId = $this->rootCategoryId($context);
         $items = [];
         $index = $startIndex;
         foreach ($products as $product) {
-            $item = $this->itemFactory->fromProduct($product, 1, $index);
+            $item = $this->itemFactory->fromProduct($product, 1, $index, $rootCategoryId);
             $item['item_list_id'] = $listId;
             $item['item_list_name'] = $listName;
 
@@ -64,11 +65,11 @@ class ProductDataBuilder
         int $startIndex = 0,
         bool $includeSearchTerm = true,
     ): DataLayerEvent {
+        $rootCategoryId = $this->rootCategoryId($context);
         $items = [];
         $index = $startIndex;
         foreach ($products as $product) {
-            $item = $this->itemFactory->fromProduct($product, 1, $index);
-            $items[] = $item;
+            $items[] = $this->itemFactory->fromProduct($product, 1, $index, $rootCategoryId);
             ++$index;
         }
 
@@ -82,5 +83,13 @@ class ProductDataBuilder
         ];
 
         return new DataLayerEvent('search', $data);
+    }
+
+    /**
+     * Einstiegskategorie des Verkaufskanals - alles darueber gehoert nicht in den Kategoriepfad.
+     */
+    private function rootCategoryId(SalesChannelContext $context): string
+    {
+        return $context->getSalesChannel()->getNavigationCategoryId();
     }
 }

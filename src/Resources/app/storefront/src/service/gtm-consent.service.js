@@ -1,3 +1,7 @@
+// spaetestens nach dieser zeit duerfen die seiten-events raus, auch wenn der
+// user-data-request noch haengt - lieber ohne user_id messen als gar nicht
+const USER_DATA_TIMEOUT = 1500;
+
 export default class GtmConsentService {
     constructor(config, dataLayerService) {
         this._mapping = config.consentMapping || {};
@@ -6,22 +10,28 @@ export default class GtmConsentService {
         this._sendConsentSignals = config.sendConsentSignals === true;
         this._externalCmpBridge = config.externalCmpBridge === true;
         this._containerId = config.containerId;
+        // eigener server-container oder googletagmanager.com
+        this._scriptOrigin = config.scriptOrigin || 'https://www.googletagmanager.com';
+        this._tagInBody = config.tagInBody === true;
         this._cspNonce = this._resolveNonce();
         this._loginStatus = config.loginStatus || 'guest';
         this._dataLayer = dataLayerService;
         this._userDataUrl = config.userDataUrl || '';
 
         this._ecEnabled = typeof config.enhancedConversions === 'string' && config.enhancedConversions !== 'off';
+        // eigener opt-in fuer gehashte kundendaten; ad_user_data haengt am marketing-haken
+        this._ecCookieName = config.enhancedConversionsCookie || '';
 
         this._grantedAnalytics = false;
-        this._grantedAdUserData = false;
+        this._grantedEc = false;
         this._pushedUser = false;
         this._pushedEc = false;
         this._userDataPending = false;
+        this._userDataSettled = false;
+        this._userDataTimer = null;
 
         this._containerLoaded = config.containerAutoLoaded === true || !this._consentManaged;
         this._analyticsCookieName = this._resolveCookieFor('analytics_storage') || 's4gtm-analytics';
-        this._adUserDataCookieName = this._resolveCookieFor('ad_user_data');
         this._readyCallbacks = [];
     }
 
@@ -36,8 +46,13 @@ export default class GtmConsentService {
         ) || '';
     }
 
+    /**
+     * Seiten-Events duerfen erst raus, wenn der Container geladen ist UND feststeht, ob noch
+     * user/enhancedConversion in den dataLayer kommen. Sonst feuert GTM das Conversion-Tag,
+     * bevor die zugehoerigen dataLayer-Variablen ueberhaupt existieren.
+     */
     onReady(callback) {
-        if (this._containerLoaded) {
+        if (this._isReady()) {
             callback();
 
             return;
@@ -45,11 +60,24 @@ export default class GtmConsentService {
         this._readyCallbacks.push(callback);
     }
 
+    _isReady() {
+        return this._containerLoaded && this._userDataSettled;
+    }
+
+    _flushReady() {
+        if (!this._isReady() || this._readyCallbacks.length === 0) {
+            return;
+        }
+
+        const callbacks = this._readyCallbacks;
+        this._readyCallbacks = [];
+        callbacks.forEach((callback) => callback());
+    }
+
     init() {
         if (!this._consentManaged) {
             this._grantedAnalytics = true;
-            this._grantedAdUserData = true;
-            this._syncUserData();
+            this._grantedEc = true;
         }
 
         this._applyFromCookies();
@@ -85,20 +113,13 @@ export default class GtmConsentService {
             return;
         }
 
-        if (this._sendConsentSignals) {
-            this._dataLayer.consentUpdate(state);
-        }
-
+        // ohne shopware-banner setzt niemand sonst die gate-cookies, die der server auswertet
         this._syncGateCookies(state);
-        this._noteConsent(state);
-
-        if (anyGranted) {
-            this._loadContainer();
-        }
+        this._apply(state, state.ad_user_data === 'granted', anyGranted);
     }
 
     _applyFromCookies() {
-        const granted = {};
+        const state = {};
         let anyGranted = false;
 
         Object.keys(this._mapping).forEach((cookieName) => {
@@ -107,19 +128,11 @@ export default class GtmConsentService {
             }
             anyGranted = true;
             this._mapping[cookieName].forEach((consentKey) => {
-                granted[consentKey] = 'granted';
+                state[consentKey] = 'granted';
             });
         });
 
-        if (this._sendConsentSignals) {
-            this._dataLayer.consentUpdate(granted);
-        }
-
-        this._noteConsent(granted);
-
-        if (anyGranted) {
-            this._loadContainer();
-        }
+        this._apply(state, this._isCookieGranted(this._ecCookieName), anyGranted);
     }
 
     _onConsentUpdate(event) {
@@ -141,34 +154,37 @@ export default class GtmConsentService {
             });
         });
 
+        // die gate-cookies setzt shopwares cookie-configuration-plugin selbst, weil sie dort als
+        // regulaere cookie-eintraege registriert sind. hier nachzusetzen wuerde bei
+        // teil-einwilligungen zu viel freischalten (marketing -> ad_user_data -> ec-cookie).
+        this._apply(state, updated[this._ecCookieName] === true, anyGranted);
+    }
+
+    _apply(state, ecGranted, anyGranted) {
         if (this._sendConsentSignals) {
             this._dataLayer.consentUpdate(state);
         }
 
-        this._syncGateCookies(state);
-        this._noteConsent(state);
+        if (state.analytics_storage === 'granted') {
+            this._grantedAnalytics = true;
+        }
+        if (ecGranted) {
+            this._grantedEc = true;
+        }
+
+        this._syncUserData();
 
         if (anyGranted) {
             this._loadContainer();
         }
     }
 
-    _noteConsent(state) {
-        if (state.analytics_storage === 'granted') {
-            this._grantedAnalytics = true;
-        }
-        if (state.ad_user_data === 'granted') {
-            this._grantedAdUserData = true;
-        }
-        this._syncUserData();
-    }
-
     _syncGateCookies(state) {
         if ('analytics_storage' in state) {
             this._syncCookie(this._analyticsCookieName, state.analytics_storage === 'granted');
         }
-        if (this._adUserDataCookieName && 'ad_user_data' in state) {
-            this._syncCookie(this._adUserDataCookieName, state.ad_user_data === 'granted');
+        if (this._ecCookieName && 'ad_user_data' in state) {
+            this._syncCookie(this._ecCookieName, state.ad_user_data === 'granted');
         }
     }
 
@@ -187,23 +203,35 @@ export default class GtmConsentService {
     }
 
     _syncUserData() {
-        if (this._userDataPending || !this._userDataUrl) {
+        if (this._userDataPending) {
+            return;
+        }
+
+        // ohne endpunkt gibt es nichts nachzuladen (kunden-, user-id-tracking und EC alle aus)
+        if (!this._userDataUrl) {
+            this._settleUserData();
+
             return;
         }
 
         const needUser = this._grantedAnalytics && !this._pushedUser;
-        const needEc = this._ecEnabled && this._grantedAdUserData && !this._pushedEc;
+        const needEc = this._ecEnabled && this._grantedEc && !this._pushedEc;
         if (!needUser && !needEc) {
+            this._settleUserData();
+
             return;
         }
 
         if (this._loginStatus !== 'logged-in') {
             this._pushedUser = true;
             this._pushedEc = true;
+            this._settleUserData();
+
             return;
         }
 
         this._userDataPending = true;
+        this._startUserDataDeadline();
 
         fetch(this._userDataUrl, {
             headers: { 'X-Requested-With': 'XMLHttpRequest' },
@@ -227,7 +255,7 @@ export default class GtmConsentService {
                 if (this._grantedAnalytics) {
                     this._pushedUser = true;
                 }
-                if (this._ecEnabled && this._grantedAdUserData) {
+                if (this._ecEnabled && this._grantedEc) {
                     this._pushedEc = true;
                 }
 
@@ -235,7 +263,33 @@ export default class GtmConsentService {
             })
             .catch(() => {
                 this._userDataPending = false;
+                this._settleUserData();
             });
+    }
+
+    _startUserDataDeadline() {
+        if (this._userDataTimer !== null || this._userDataSettled) {
+            return;
+        }
+
+        this._userDataTimer = window.setTimeout(() => {
+            this._userDataTimer = null;
+            // der request darf weiterlaufen, die seiten-events warten nur nicht mehr auf ihn
+            this._settleUserData();
+        }, USER_DATA_TIMEOUT);
+    }
+
+    _settleUserData() {
+        if (this._userDataTimer !== null) {
+            window.clearTimeout(this._userDataTimer);
+            this._userDataTimer = null;
+        }
+        if (this._userDataSettled) {
+            return;
+        }
+
+        this._userDataSettled = true;
+        this._flushReady();
     }
 
     _loadContainer() {
@@ -245,21 +299,27 @@ export default class GtmConsentService {
         this._containerLoaded = true;
 
         const nonce = this._cspNonce;
+        const inBody = this._tagInBody;
+        const origin = this._scriptOrigin;
         (function loadGtm(w, d, s, l, i) {
             w[l] = w[l] || [];
             w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-            const f = d.getElementsByTagName(s)[0];
             const j = d.createElement(s);
             j.async = true;
             if (nonce) {
                 j.setAttribute('nonce', nonce);
             }
-            j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i;
-            f.parentNode.insertBefore(j, f);
+            j.src = origin + '/gtm.js?id=' + i;
+
+            const anchor = inBody ? null : d.getElementsByTagName(s)[0];
+            if (anchor && anchor.parentNode) {
+                anchor.parentNode.insertBefore(j, anchor);
+            } else {
+                (d.body || d.head || d.documentElement).appendChild(j);
+            }
         }(window, document, 'script', 'dataLayer', this._containerId));
 
-        this._readyCallbacks.forEach((callback) => callback());
-        this._readyCallbacks = [];
+        this._flushReady();
     }
 
     _isCookieGranted(name) {

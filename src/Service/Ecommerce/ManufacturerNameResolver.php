@@ -2,6 +2,7 @@
 
 namespace Shop4GoogleTagManager\Service\Ecommerce;
 
+use Shopware\Core\Content\Product\Aggregate\ProductManufacturer\ProductManufacturerEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -16,6 +17,11 @@ class ManufacturerNameResolver
     ) {
     }
 
+    /**
+     * @param list<string|null> $manufacturerIds
+     *
+     * @return array<string, string>
+     */
     public function resolve(array $manufacturerIds, Context $context): array
     {
         $ids = array_values(array_unique(array_filter(
@@ -28,14 +34,16 @@ class ManufacturerNameResolver
         }
 
         $cacheKey = $context->getLanguageId();
-        $cached = &$this->cache[$cacheKey];
-        $cached ??= [];
+        $cached = $this->cache[$cacheKey] ?? [];
 
         $missing = array_values(array_filter($ids, static fn (string $id): bool => !\array_key_exists($id, $cached)));
         if ($missing !== []) {
+            // fehlende ids vormerken, damit ein nicht gefundener hersteller nicht bei jedem
+            // aufruf erneut abgefragt wird
             foreach ($missing as $id) {
                 $cached[$id] = null;
             }
+            /** @var ProductManufacturerEntity $manufacturer */
             foreach ($this->manufacturerRepository->search(new Criteria($missing), $context) as $manufacturer) {
                 $name = $manufacturer->getTranslation('name') ?? $manufacturer->get('name');
                 if (is_string($name) && $name !== '') {
@@ -43,6 +51,8 @@ class ManufacturerNameResolver
                 }
             }
         }
+
+        $this->cache[$cacheKey] = $cached;
 
         $map = [];
         foreach ($ids as $id) {

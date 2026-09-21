@@ -124,9 +124,9 @@ class GtmEventValidationSubscriber implements EventSubscriberInterface
             $value = json_decode($value, true);
         }
 
-        $add = fn (string $message): bool => (bool) $violations->add(
-            $this->violation($message, $payload['payload'], 'payload', $index),
-        );
+        $add = function (string $message) use ($violations, $payload, $index): void {
+            $violations->add($this->violation($message, $payload['payload'], 'payload', $index));
+        };
 
         if (!is_array($value)) {
             $add('Die Payload muss ein JSON-Objekt sein.');

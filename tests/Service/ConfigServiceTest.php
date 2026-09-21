@@ -46,9 +46,15 @@ class ConfigServiceTest extends TestCase
                 default => null,
             };
         });
-        $systemConfig->method('getString')
-            ->with('Shop4GoogleTagManager.config.containerId', 'sc')
-            ->willReturn('  GTM-ABC123  ');
+        $systemConfig->method('getString')->willReturnCallback(static function (string $key, ?string $sc) {
+            static::assertSame('sc', $sc);
+
+            return match ($key) {
+                'Shop4GoogleTagManager.config.containerId' => '  GTM-ABC123  ',
+                'Shop4GoogleTagManager.config.serverContainerUrl' => '  https://gtm.example.com/  ',
+                default => '',
+            };
+        });
 
         $config = (new ConfigService($systemConfig, new PayloadValidator()))->getConfig('sc');
 
@@ -57,6 +63,27 @@ class ConfigServiceTest extends TestCase
         static::assertTrue($config->remarketing);
         // container-id wird getrimmt
         static::assertSame('GTM-ABC123', $config->containerId);
+        // server-container-url wird getrimmt und der abschliessende slash entfernt
+        static::assertSame('https://gtm.example.com', $config->serverContainerUrl);
+        static::assertSame('https://gtm.example.com', $config->gtmOrigin());
+    }
+
+    public function testInvalidServerContainerUrlIsDiscarded(): void
+    {
+        // eine kaputte adresse wuerde den container-load ins leere laufen lassen -
+        // dann lieber zurueck auf google als still gar kein tracking
+        $systemConfig = $this->createMock(SystemConfigService::class);
+        $systemConfig->method('get')->willReturn(null);
+        $systemConfig->method('getString')->willReturnCallback(static fn (string $key): string => match ($key) {
+            'Shop4GoogleTagManager.config.serverContainerUrl' => 'http://gtm.example.com?a=1',
+            default => '',
+        });
+
+        $config = (new ConfigService($systemConfig, new PayloadValidator()))->getConfig('sc');
+
+        static::assertSame('', $config->serverContainerUrl);
+        static::assertSame('https://www.googletagmanager.com', $config->gtmOrigin());
+        static::assertFalse($config->usesServerContainer());
     }
 
     /**

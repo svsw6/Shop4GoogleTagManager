@@ -42,6 +42,23 @@
                 </sw-inherit-wrapper>
 
                 <sw-inherit-wrapper
+                        v-model:value="editConfig.serverContainerUrl"
+                        :has-parent="hasParent"
+                        :inherited-value="globalConfig.serverContainerUrl"
+                        :label="$tc('s4gtm-settings.card.base.serverContainerUrl')"
+                        :help-text="$tc('s4gtm-settings.card.base.serverContainerUrlHelp')">
+                    <template #content="{ currentValue, updateCurrentValue, isInherited }">
+                        <mt-text-field
+                                :model-value="currentValue"
+                                :disabled="isInherited"
+                                :placeholder="'https://gtm.example.com'"
+                                :error="serverContainerUrlError"
+                                @update:model-value="updateCurrentValue">
+                        </mt-text-field>
+                    </template>
+                </sw-inherit-wrapper>
+
+                <sw-inherit-wrapper
                         v-model:value="editConfig.tagPosition"
                         :has-parent="hasParent"
                         :inherited-value="globalConfig.tagPosition"
@@ -74,6 +91,15 @@
                             :help-text="$tc('s4gtm-settings.card.base.debugHelp')">
                     </s4gtm-inherit-switch>
                 </sw-container>
+
+                <mt-banner
+                        v-if="notOperational"
+                        variant="critical"
+                        :closable="false"
+                        :title="$tc('s4gtm-settings.card.base.notOperationalTitle')"
+                        class="s4gtm-settings__consent-warning">
+                    {{ $tc('s4gtm-settings.card.base.notOperational') }}
+                </mt-banner>
             </mt-card>
         {% endblock %}
 

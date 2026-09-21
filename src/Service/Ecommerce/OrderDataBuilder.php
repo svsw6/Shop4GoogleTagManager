@@ -28,7 +28,7 @@ class OrderDataBuilder
             'ecommerce' => [
                 'transaction_id' => $order->getOrderNumber(),
                 'currency' => $order->getCurrency()?->getIsoCode() ?? $context->getCurrency()->getIsoCode(),
-                'value' => $this->itemsValue($items),
+                'value' => $this->netValue($order, $items),
                 'tax' => $this->round($this->resolveTax($order)),
                 'shipping' => $this->round($order->getShippingTotal()),
                 'coupon' => $this->resolveCoupon($order),
@@ -54,6 +54,28 @@ class OrderDataBuilder
         return $items;
     }
 
+    /**
+     * GA4-Umsatz der Positionen abzueglich der Rabatt-Positionen. Shopware laesst die
+     * Produktpreise bei Aktionen unveraendert und bucht den Nachlass als eigene
+     * promotion-Position - ohne diese Korrektur meldet GA4 zu hohen Umsatz.
+     */
+    private function netValue(OrderEntity $order, array $productLineItems): float
+    {
+        return $this->round(max(0.0, $this->itemsValue($productLineItems) + $this->discountTotal($order)));
+    }
+
+    private function discountTotal(OrderEntity $order): float
+    {
+        $sum = 0.0;
+        foreach ($order->getLineItems() ?? [] as $lineItem) {
+            if ($lineItem->getType() === LineItem::PROMOTION_LINE_ITEM_TYPE) {
+                $sum += $lineItem->getTotalPrice();
+            }
+        }
+
+        return $sum;
+    }
+
     private function itemsValue(array $productLineItems): float
     {
         $sum = 0.0;
@@ -76,9 +98,7 @@ class OrderDataBuilder
 
     private function resolveTax(OrderEntity $order): float
     {
-        $price = $order->getPrice();
-
-        return $price !== null ? $price->getCalculatedTaxes()->getAmount() : 0.0;
+        return $order->getPrice()->getCalculatedTaxes()->getAmount();
     }
 
     private function resolveCoupon(OrderEntity $order): string

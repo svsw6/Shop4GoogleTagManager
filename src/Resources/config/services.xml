@@ -119,6 +119,11 @@
             <argument type="service" id="Shop4GoogleTagManager\Service\PendingEventStore"/>
         </service>
 
+        <service id="Shop4GoogleTagManager\Subscriber\PendingEventCookieSubscriber">
+            <argument type="service" id="Shop4GoogleTagManager\Service\PendingEventStore"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="Shop4GoogleTagManager\Subscriber\GtmEventValidationSubscriber">
             <argument type="service" id="Shop4GoogleTagManager\Service\PayloadValidator"/>
             <tag name="kernel.event_subscriber"/>

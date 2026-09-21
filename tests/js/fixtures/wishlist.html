@@ -1,0 +1,42 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Merkzettel-Fixture</title></head>
+<body>
+<!--
+  Produktdetailseite mit Merkzettel-Button. Die Klassen und Attribute entsprechen
+  @Storefront/storefront/component/product/card/wishlist.html.twig aus Shopware 6.7 -
+  der Testshop hat die Merkzettel-Funktion deaktiviert, deshalb ist dieses Fixture aus
+  dem Core-Template zusammengesetzt statt aus einem Live-Render uebernommen.
+-->
+<div class="product-detail">
+    <div class="product-wishlist">
+        <button class="product-wishlist-019f00 product-wishlist-action product-wishlist-not-added z-2"
+                title="Zum Merkzettel hinzufuegen"
+                data-add-to-wishlist="true"
+                data-add-to-wishlist-options='{"productId":"019f00"}'>
+            <span class="product-wishlist-btn-content">Merken</span>
+        </button>
+    </div>
+
+    <div class="product-detail-buy">
+        <form action="/checkout/line-item/add" method="post">
+            <input type="number" name="quantity" value="1">
+            <button type="submit">In den Warenkorb</button>
+        </form>
+        <data class="s4gtm-product-data" hidden
+              data-s4gtm-item='{"item_id":"SW-WISH-1","item_name":"Merkprodukt","price":24.5,"quantity":1,"item_category":"Lebensmittel","item_category2":"Backwaren"}'></data>
+    </div>
+</div>
+
+<div class="s4gtm-promo-area">
+    <div class="cms-block-banner"
+         data-s4gtm-promotion='{"promotion_id":"SOMMER25","promotion_name":"Sommeraktion","creative_name":"hero","creative_slot":"startseite_oben"}'>
+        <a href="/kampagne">Sommeraktion</a>
+    </div>
+
+    <button data-s4gtm-share="whatsapp"
+            data-s4gtm-share-content-type="product"
+            data-s4gtm-share-item-id="SW-WISH-1">Teilen</button>
+</div>
+</body>
+</html>

@@ -28,9 +28,8 @@ class OrderDataBuilderTest extends TestCase
         static::assertSame('purchase', $data['event']);
         static::assertSame('10001', $eco['transaction_id']);
         static::assertSame('EUR', $eco['currency']);
-        // value = summe der produkt-items OHNE versand (50*2 = 100); der cart-rabatt steckt in coupon,
-        // nicht im value -> so bleibt value == summe(items)
-        static::assertSame(100.0, $eco['value']);
+        // value = warensumme OHNE versand (50*2 = 100) abzueglich des rabatt-line-items (-10)
+        static::assertSame(90.0, $eco['value']);
         static::assertSame(19.0, $eco['tax']);
         static::assertSame(5.0, $eco['shipping']);
         static::assertSame('SUMMER10', $eco['coupon']);
@@ -50,6 +49,23 @@ class OrderDataBuilderTest extends TestCase
         static::assertIsFloat($eco['shipping']);
         static::assertIsFloat($eco['items'][0]['price']);
         static::assertIsInt($eco['items'][0]['quantity']);
+    }
+
+    public function testPurchaseValueExcludesPromotionDiscount(): void
+    {
+        // shopware laesst die produktpreise bei aktionen unveraendert und bucht den nachlass
+        // als eigene position. ohne abzug meldet GA4 systematisch zu hohen umsatz.
+        $eco = $this->builder()
+            ->buildPurchase($this->order(), $this->context())
+            ->jsonSerialize()['ecommerce'];
+
+        $itemsSum = array_sum(array_map(
+            static fn (array $item): float => $item['price'] * $item['quantity'],
+            $eco['items'],
+        ));
+
+        static::assertSame(100.0, $itemsSum);
+        static::assertSame(90.0, $eco['value']);
     }
 
     private function builder(): OrderDataBuilder
@@ -77,6 +93,7 @@ class OrderDataBuilderTest extends TestCase
         $promotion->setPayload(['code' => 'SUMMER10']);
         $promotion->setLabel('Rabatt');
         $promotion->setUnitPrice(-10.0);
+        $promotion->setTotalPrice(-10.0);
         $promotion->setQuantity(1);
 
         $price = $this->createMock(CartPrice::class);

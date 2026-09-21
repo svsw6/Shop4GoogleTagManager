@@ -14,13 +14,39 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class CookieProviderTest extends TestCase
 {
-    public function testAddsAnalyticsAndAdEntriesWhenRemarketingEnabled(): void
+    public function testAddsAnalyticsAndMarketingEntriesWhenRemarketingEnabled(): void
     {
         $provider = new CookieProvider($this->decorated(), $this->configService(remarketing: true), new RequestStack());
 
         $cookies = $this->collectCookies($provider->getCookieGroups());
 
         static::assertContains(ConsentService::COOKIE_ANALYTICS, $cookies);
+        static::assertContains(ConsentService::COOKIE_MARKETING, $cookies);
+    }
+
+    public function testOmitsEnhancedEntryWhileEnhancedConversionsAreOff(): void
+    {
+        // frueher wurde der haken schon bei aktivem remarketing eingeblendet. er haette dann
+        // nur ad_user_data gesperrt, ohne dass ueberhaupt gehashte daten uebertragen werden -
+        // der beschreibungstext im banner waere damit schlicht falsch gewesen.
+        $provider = new CookieProvider($this->decorated(), $this->configService(remarketing: true), new RequestStack());
+
+        $cookies = $this->collectCookies($provider->getCookieGroups());
+
+        static::assertNotContains(ConsentService::COOKIE_ENHANCED, $cookies);
+    }
+
+    public function testAddsEnhancedEntryWhenEnhancedConversionsEnabled(): void
+    {
+        $configService = $this->createMock(ConfigService::class);
+        $configService->method('getConfig')->willReturn(
+            $this->config(remarketing: true, enhancedConversions: 'full'),
+        );
+
+        $provider = new CookieProvider($this->decorated(), $configService, new RequestStack());
+
+        $cookies = $this->collectCookies($provider->getCookieGroups());
+
         static::assertContains(ConsentService::COOKIE_MARKETING, $cookies);
         static::assertContains(ConsentService::COOKIE_ENHANCED, $cookies);
     }

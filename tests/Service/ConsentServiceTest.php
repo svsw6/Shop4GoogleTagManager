@@ -38,12 +38,79 @@ class ConsentServiceTest extends TestCase
 
     public function testWaitForUpdateOverrideWinsOverConfig(): void
     {
-        // im checkout (eager) wird 0 uebergeben -> keine kuenstliche verzoegerung, unabhaengig vom config-wert
         $service = new ConsentService(
             $this->configService(consentSource: 'shopware', remarketing: true, consentWaitForUpdate: 500),
         );
 
         static::assertSame(0, $service->getDefaultConsentState('sc', 0)['wait_for_update']);
+    }
+
+    public function testAlreadyGrantedPurposesAreRaisedInDefaultState(): void
+    {
+        // sonst feuert ein serverseitig geladener container erst cookielos und wartet auf das
+        // consent-update aus dem storefront-bundle - genau im checkout, wo es am teuersten ist
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $state = $service->getDefaultConsentState('sc', null, ['analytics_storage']);
+
+        static::assertSame('granted', $state['analytics_storage']);
+        // nicht erteilte zwecke bleiben unberuehrt
+        static::assertSame('denied', $state['ad_storage']);
+        static::assertSame('denied', $state['ad_user_data']);
+    }
+
+    public function testUnknownGrantedKeysAreIgnored(): void
+    {
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $state = $service->getDefaultConsentState('sc', null, ['wait_for_update', 'erfunden']);
+
+        static::assertSame(500, $state['wait_for_update']);
+        static::assertArrayNotHasKey('erfunden', $state);
+    }
+
+    public function testResolveGrantedConsentKeysReadsCookies(): void
+    {
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $granted = $service->resolveGrantedConsentKeys([ConsentService::COOKIE_ANALYTICS => '1'], 'sc');
+
+        static::assertSame(['analytics_storage'], $granted);
+    }
+
+    public function testResolveGrantedConsentKeysIgnoresForeignAndUnsetCookies(): void
+    {
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $granted = $service->resolveGrantedConsentKeys([
+            ConsentService::COOKIE_ANALYTICS => '0',
+            'irgendein-anderes-cookie' => '1',
+        ], 'sc');
+
+        static::assertSame([], $granted);
+    }
+
+    public function testResolveGrantedConsentKeysExpandsMarketingCookie(): void
+    {
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $granted = $service->resolveGrantedConsentKeys([ConsentService::COOKIE_MARKETING => '1'], 'sc');
+
+        static::assertContains('ad_storage', $granted);
+        static::assertContains('ad_user_data', $granted);
+        static::assertContains('ad_personalization', $granted);
+        static::assertNotContains('analytics_storage', $granted);
+    }
+
+    public function testEnhancedConversionsCookieOnlyExistsWhenEnabled(): void
+    {
+        $off = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+        static::assertNull($off->getEnhancedConversionsCookie('sc'));
+
+        $on = new ConsentService(
+            $this->configService(consentSource: 'shopware', remarketing: true, enhancedConversions: 'email'),
+        );
+        static::assertSame(ConsentService::COOKIE_ENHANCED, $on->getEnhancedConversionsCookie('sc'));
     }
 
     public function testDefaultStateIsDeniedForExternalCmpSource(): void
@@ -92,16 +159,37 @@ class ConsentServiceTest extends TestCase
 
         $mapping = $service->getCookieConsentMapping('sc');
 
-        // drei einzeln steuerbare zwecke
-        static::assertCount(3, $mapping);
+        // ohne enhanced conversions bleiben zwei einzeln steuerbare zwecke
+        static::assertCount(2, $mapping);
         static::assertSame(['analytics_storage'], $mapping[ConsentService::COOKIE_ANALYTICS]);
         static::assertContains('ad_storage', $mapping[ConsentService::COOKIE_MARKETING]);
         static::assertContains('ad_personalization', $mapping[ConsentService::COOKIE_MARKETING]);
         // personalisierung wird zusammen mit der marketing-gruppe angehoben
         static::assertContains('personalization_storage', $mapping[ConsentService::COOKIE_MARKETING]);
-        // erweitertes conversion-tracking ist ein eigener cookie mit eigenem signal
+    }
+
+    public function testMarketingCookieRaisesAdUserData(): void
+    {
+        // consent mode v2 verlangt ad_user_data bereits fuer die normale ads-conversion-messung.
+        // haengt das signal an einem separaten haken, verliert man conversions, obwohl der
+        // besucher der marketing-nutzung zugestimmt hat.
+        $service = new ConsentService($this->configService(consentSource: 'shopware', remarketing: true));
+
+        $mapping = $service->getCookieConsentMapping('sc');
+
+        static::assertContains('ad_user_data', $mapping[ConsentService::COOKIE_MARKETING]);
+    }
+
+    public function testEnhancedConversionsKeepTheirOwnOptIn(): void
+    {
+        $service = new ConsentService(
+            $this->configService(consentSource: 'shopware', remarketing: true, enhancedConversions: 'full'),
+        );
+
+        $mapping = $service->getCookieConsentMapping('sc');
+
+        static::assertCount(3, $mapping);
         static::assertSame(['ad_user_data'], $mapping[ConsentService::COOKIE_ENHANCED]);
-        static::assertNotContains('ad_user_data', $mapping[ConsentService::COOKIE_MARKETING]);
     }
 
     public function testCookieMappingOmitsAdPurposesWhenRemarketingDisabled(): void

@@ -5,6 +5,7 @@ namespace Shop4GoogleTagManager\Service;
 use Shop4GoogleTagManager\Struct\DataLayerEvent;
 use Shop4GoogleTagManager\Struct\PluginConfig;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -25,25 +26,46 @@ class GtmRenderContextFactory
     {
         $salesChannelId = $context->getSalesChannel()->getId();
         $config = $this->configService->getConfig($salesChannelId);
-        $eagerCheckout = $this->shouldEagerLoadCheckout($config, $request, $salesChannelId);
 
         return [
             's4gtmConfig' => $config,
             's4gtmConsentDefault' => $this->consentService->getDefaultConsentState(
                 $salesChannelId,
-                $eagerCheckout ? 0 : null,
+                null,
+                $this->resolveServerSideGrants($request, $salesChannelId),
             ),
             's4gtmConsentMapping' => $this->consentService->getCookieConsentMapping($salesChannelId),
+            's4gtmEnhancedConversionsCookie' => $this->consentService->getEnhancedConversionsCookie($salesChannelId),
             's4gtmBaseDataLayer' => $this->dataLayerService->buildBaseDataLayer($context, $request->getLocale()),
             's4gtmGlobalEvents' => ($config->dataLayerEnabled && !$request->isXmlHttpRequest())
                 ? $this->resolveGlobalEvents($salesChannelId, $context->getContext())
                 : [],
             's4gtmClientEvents' => $this->configService->getClientEventConfig($salesChannelId),
             's4gtmCspNonce' => $this->resolveCspNonce($request),
+            's4gtmHasUserData' => $this->hasUserData($config),
+            's4gtmNavigationCategoryId' => $context->getSalesChannel()->getNavigationCategoryId(),
+            's4gtmPendingCookie' => PendingEventStore::FLAG_COOKIE,
             's4gtmHasPendingEvents' => $this->shouldSignalPending($config, $request, $view)
                 && $this->pendingEventStore->hasPending(),
-            's4gtmContainerLoaded' => $config->autoLoadsContainer() || $eagerCheckout,
+            's4gtmContainerLoaded' => $config->autoLoadsContainer()
+                || $this->shouldEagerLoadCheckout($config, $request, $salesChannelId),
         ];
+    }
+
+    /**
+     * Bereits per Cookie erteilte Zwecke duerfen nur dann in den `consent default` wandern,
+     * wenn die Antwort garantiert nicht im HTTP-Cache landet. Sonst koennte eine fuer einen
+     * einwilligenden Besucher gerenderte Seite jemandem ausgeliefert werden, der abgelehnt hat.
+     *
+     * @return list<string>
+     */
+    private function resolveServerSideGrants(Request $request, ?string $salesChannelId): array
+    {
+        if (!$request->attributes->has(PlatformRequest::ATTRIBUTE_NO_STORE)) {
+            return [];
+        }
+
+        return $this->consentService->resolveGrantedConsentKeys($request->cookies->all(), $salesChannelId);
     }
 
     private function shouldEagerLoadCheckout(PluginConfig $config, Request $request, ?string $salesChannelId): bool
@@ -57,13 +79,18 @@ class GtmRenderContextFactory
             return false;
         }
 
-        foreach (array_keys($this->consentService->getCookieConsentMapping($salesChannelId)) as $cookie) {
-            if ($request->cookies->get($cookie) === '1') {
-                return true;
-            }
-        }
+        return $this->consentService->resolveGrantedConsentKeys($request->cookies->all(), $salesChannelId) !== [];
+    }
 
-        return false;
+    /**
+     * Ohne kundenbezogene Felder und ohne Enhanced Conversions liefert der Endpunkt
+     * garantiert ein leeres Objekt - dann gar nicht erst anfragen.
+     */
+    private function hasUserData(PluginConfig $config): bool
+    {
+        return $config->customerTracking
+            || $config->userIdTracking
+            || $config->enhancedConversionsEnabled();
     }
 
     private function shouldSignalPending(PluginConfig $config, Request $request, string $view): bool

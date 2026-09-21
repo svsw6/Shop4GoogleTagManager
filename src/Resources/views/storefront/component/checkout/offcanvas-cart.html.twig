@@ -1,0 +1,14 @@
+{% sw_extends '@Storefront/storefront/component/checkout/offcanvas-cart.html.twig' %}
+
+{% block component_offcanvas_cart %}
+    {{ parent() }}
+
+    {# marker fuer das storefront-js: taucht er im DOM auf, wurde der offcanvas-warenkorb
+       geoeffnet oder neu geladen - dann kann view_cart aus den positionen gebaut werden #}
+    {% if s4gtmConfig is defined and s4gtmConfig.operational and s4gtmConfig.dataLayerEnabled
+        and page is defined and page.cart is defined %}
+        <data class="s4gtm-offcanvas-cart"
+              hidden
+              data-s4gtm-cart-token="{{ page.cart.token|e('html_attr') }}"></data>
+    {% endif %}
+{% endblock %}

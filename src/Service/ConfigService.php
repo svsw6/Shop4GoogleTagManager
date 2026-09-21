@@ -21,7 +21,9 @@ class ConfigService
         'trackContactForm' => false,
         'trackNewsletter' => true,
         'trackCustomForms' => false,
-        'anonymizeSearchTerm' => true,
+        // aus: ein `search`-event ohne search_term hat keinen aussagewert, und der
+        // selbst eingegebene suchbegriff ist fuer sich kein personenbezogenes datum
+        'anonymizeSearchTerm' => false,
         'advancedConsentMode' => false,
         'eagerCheckoutLoad' => false,
     ];
@@ -79,6 +81,7 @@ class ConfigService
             anonymizeSearchTerm: $this->getBool('anonymizeSearchTerm', $salesChannelId),
             eagerCheckoutLoad: $this->getBool('eagerCheckoutLoad', $salesChannelId),
             consentWaitForUpdate: $this->getInt('consentWaitForUpdate', $salesChannelId),
+            serverContainerUrl: $this->getServerContainerUrl($salesChannelId),
         );
     }
 
@@ -172,6 +175,17 @@ class ConfigService
         $value = $this->systemConfigService->get(self::PREFIX . $key, $salesChannelId);
 
         return is_string($value) && in_array($value, $allowed, true) ? $value : $default;
+    }
+
+    /**
+     * Eine ungueltige URL wird verworfen statt uebernommen: sonst liefe der Container-Load
+     * gegen eine kaputte Adresse und das Tracking waere komplett still.
+     */
+    private function getServerContainerUrl(?string $salesChannelId): string
+    {
+        $value = rtrim(trim($this->systemConfigService->getString(self::PREFIX . 'serverContainerUrl', $salesChannelId)), '/');
+
+        return preg_match(PluginConfig::SERVER_CONTAINER_URL_PATTERN, $value) === 1 ? $value : '';
     }
 
     private function getContainerId(?string $salesChannelId): string
