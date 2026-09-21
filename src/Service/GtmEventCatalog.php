@@ -45,10 +45,6 @@ final class GtmEventCatalog
         'share' => self::CONTEXT_GLOBAL,
     ];
 
-    /**
-     * Events, die das Storefront-JS ausloest - deren Konfiguration (aktiv, GA4-Name, Payload)
-     * wandert deshalb in den Konfigurationsblock der Seite.
-     */
     public const CLIENT_EVENTS = [
         'add_to_cart',
         'remove_from_cart',

@@ -20,7 +20,6 @@ class PluginConfig extends Struct
     public const EC_MODES = [self::EC_OFF, self::EC_EMAIL, self::EC_FULL];
     public const DEFAULT_WAIT_FOR_UPDATE = 500;
     public const GOOGLE_TAG_ORIGIN = 'https://www.googletagmanager.com';
-    // eigener server-container: nur https, kein query/fragment, keine pfad-traversierung
     public const SERVER_CONTAINER_URL_PATTERN = '/^https:\/\/[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d{1,5})?(\/[A-Za-z0-9._~-]+)*$/';
     public const MAX_WAIT_FOR_UPDATE = 10000;
 
@@ -49,9 +48,6 @@ class PluginConfig extends Struct
     ) {
     }
 
-    /**
-     * Herkunft von gtm.js und ns.html - entweder Google oder der eigene Server-Container.
-     */
     public function gtmOrigin(): string
     {
         return $this->serverContainerUrl !== '' ? $this->serverContainerUrl : self::GOOGLE_TAG_ORIGIN;

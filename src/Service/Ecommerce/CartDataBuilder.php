@@ -86,11 +86,6 @@ class CartDataBuilder
         return $items;
     }
 
-    /**
-     * GA4-Umsatz der Positionen abzueglich der Rabatt-Positionen. Shopware laesst die
-     * Produktpreise bei Aktionen unveraendert und bucht den Nachlass als eigene
-     * promotion-Position - ohne diese Korrektur meldet GA4 zu hohen Umsatz.
-     */
     private function netValue(Cart $cart, array $productLineItems): float
     {
         return $this->round(max(0.0, $this->itemsValue($productLineItems) + $this->discountTotal($cart)));

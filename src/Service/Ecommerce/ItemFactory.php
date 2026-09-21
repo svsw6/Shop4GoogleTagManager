@@ -106,9 +106,6 @@ class ItemFactory
     }
 
     /**
-     * GA4 erwartet den Kategoriepfad von grob nach fein: item_category ist die oberste Ebene,
-     * item_category2 die naechste und so weiter (maximal fuenf).
-     *
      * @return list<string>
      */
     private function resolveCategoryPath(SalesChannelProductEntity $product, ?string $rootCategoryId): array
@@ -125,7 +122,6 @@ class ItemFactory
             return is_string($name) && $name !== '' ? [$name] : [];
         }
 
-        // alles oberhalb des verkaufskanal-einstiegs weglassen: diese ebenen sieht im shop niemand
         if ($rootCategoryId !== null && \array_key_exists($rootCategoryId, $breadcrumb)) {
             $breadcrumb = \array_slice($breadcrumb, array_search($rootCategoryId, array_keys($breadcrumb), true) + 1, null, true);
         }

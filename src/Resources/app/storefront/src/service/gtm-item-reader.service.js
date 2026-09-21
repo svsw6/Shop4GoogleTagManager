@@ -1,16 +1,7 @@
 export const PRODUCT_DATA_SELECTOR = '.s4gtm-product-data';
 export const CART_ITEM_DATA_SELECTOR = '.s4gtm-cart-item-data';
-// shopware rendert dieses attribut an jeder produktbox - es ueberlebt auch themes,
-// die den produktbox-block komplett ersetzen
 export const CORE_PRODUCT_SELECTOR = '[data-product-information]';
 
-/**
- * Liest GA4-Items aus dem DOM.
- *
- * Bevorzugt werden die vom Plugin gerenderten `<data>`-Elemente (vollstaendige Item-Daten).
- * Fehlen sie, weil ein Theme den Produktbox-Block ersetzt hat, greift Shopwares eigenes
- * Attribut als Rueckfallebene - mit weniger Feldern, aber besser als gar kein Event.
- */
 export default class GtmItemReader {
     parseAnnotated(el) {
         try {
@@ -46,9 +37,6 @@ export default class GtmItemReader {
         return item;
     }
 
-    /**
-     * Item zu einem Element - erst in der umgebenden Produktbox suchen, dann auf der Seite.
-     */
     forElement(el) {
         const box = el.closest(CORE_PRODUCT_SELECTOR);
         if (box !== null) {
@@ -56,7 +44,6 @@ export default class GtmItemReader {
             return annotated ? this.parseAnnotated(annotated) : this.parseCoreProduct(box);
         }
 
-        // produktdetailseite: dort gibt es genau ein produkt-data-element und keine box
         const all = document.querySelectorAll(PRODUCT_DATA_SELECTOR);
         return all.length === 1 ? this.parseAnnotated(all[0]) : null;
     }
@@ -76,7 +63,6 @@ export default class GtmItemReader {
     }
 
     _annotatedForForm(form, selector) {
-        // 1. bevorzugt das produkt-/positions-data im formular selbst
         const inForm = form.querySelector(selector);
         if (inForm) {
             return this.parseAnnotated(inForm);
@@ -125,9 +111,6 @@ export default class GtmItemReader {
         return ambiguous ? null : best;
     }
 
-    /**
-     * Alle Produkt-Items innerhalb eines Containers, in DOM-Reihenfolge und ohne Dubletten.
-     */
     collectProducts(root) {
         const annotated = this._map(root.querySelectorAll(PRODUCT_DATA_SELECTOR), (n) => this.parseAnnotated(n));
         if (annotated.length > 0) {

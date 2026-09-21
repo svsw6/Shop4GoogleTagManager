@@ -6,7 +6,6 @@ const { Component, Mixin } = Shopware;
 const DOMAIN = 'Shop4GoogleTagManager.config';
 const PREFIX = `${DOMAIN}.`;
 const CONTAINER_ID_PATTERN = /^GTM-[A-Z0-9]{1,20}$/;
-// muss zu PluginConfig::SERVER_CONTAINER_URL_PATTERN passen
 const SERVER_CONTAINER_URL_PATTERN = /^https:\/\/[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+(:\d{1,5})?(\/[A-Za-z0-9._~-]+)*$/;
 
 Component.register('s4gtm-settings', {
@@ -100,7 +99,6 @@ Component.register('s4gtm-settings', {
             return this.effective('enhancedConversions') !== 'off';
         },
 
-        // inline-fehler, falls die container-id nicht dem gtm-format entspricht
         containerIdError() {
             const value = this.effectiveContainerId;
             if (!value || CONTAINER_ID_PATTERN.test(value)) {
@@ -118,8 +116,6 @@ Component.register('s4gtm-settings', {
             return this.editConfig.serverContainerUrl;
         },
 
-        // eine ungueltige url wuerde serverseitig verworfen - der shop laedt dann still
-        // wieder von google statt vom eigenen server-container
         serverContainerUrlError() {
             const value = this.effectiveServerContainerUrl;
             if (!value || SERVER_CONTAINER_URL_PATTERN.test(value)) {
@@ -129,8 +125,6 @@ Component.register('s4gtm-settings', {
             return { detail: this.$tc('s4gtm-settings.card.base.serverContainerUrlInvalid') };
         },
 
-        // plugin an, aber ohne brauchbare container-id: die storefront bleibt dann
-        // vollstaendig stumm, ohne fehlermeldung und ohne log-eintrag
         notOperational() {
             return this.effective('active') === true
                 && !CONTAINER_ID_PATTERN.test(this.effectiveContainerId || '');
@@ -200,7 +194,6 @@ Component.register('s4gtm-settings', {
         },
 
         onSave() {
-            // ungueltige werte wuerden serverseitig verworfen und das plugin still abschalten
             if (this.containerIdError !== null || this.serverContainerUrlError !== null) {
                 this.createNotificationError({
                     message: this.$tc('s4gtm-settings.general.saveBlocked'),

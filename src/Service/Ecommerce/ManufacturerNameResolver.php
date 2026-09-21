@@ -38,8 +38,6 @@ class ManufacturerNameResolver
 
         $missing = array_values(array_filter($ids, static fn (string $id): bool => !\array_key_exists($id, $cached)));
         if ($missing !== []) {
-            // fehlende ids vormerken, damit ein nicht gefundener hersteller nicht bei jedem
-            // aufruf erneut abgefragt wird
             foreach ($missing as $id) {
                 $cached[$id] = null;
             }

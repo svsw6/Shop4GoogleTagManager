@@ -10,13 +10,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
-/**
- * Haelt ein Cookie synchron zur Session-Queue der vorgemerkten Events.
- *
- * Das Hinweis-Flag im HTML allein genuegt nicht: nach einem Logout landet der Besucher
- * auf einer cachebaren Seite, deren Flag aus dem Cache stammen kann. Das Cookie ist
- * dagegen pro Besucher korrekt. Es enthaelt keine Nutzdaten, nur "da liegt etwas an".
- */
 class PendingEventCookieSubscriber implements EventSubscriberInterface
 {
     public function __construct(
@@ -54,10 +47,6 @@ class PendingEventCookieSubscriber implements EventSubscriberInterface
         );
     }
 
-    /**
-     * Auf cachebaren Routen darf kein Set-Cookie angehaengt werden, sonst wandert
-     * das Flag mit der Antwort in den HTTP-Cache.
-     */
     private function isCacheable(Request $request): bool
     {
         $cache = $request->attributes->get(PlatformRequest::ATTRIBUTE_HTTP_CACHE);
@@ -74,7 +63,7 @@ class PendingEventCookieSubscriber implements EventSubscriberInterface
             '/',
             null,
             $request->isSecure(),
-            false, // muss fuer das storefront-js lesbar sein
+            false,
             false,
             Cookie::SAMESITE_LAX,
         );

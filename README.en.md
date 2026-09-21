@@ -214,9 +214,7 @@ https://gtm.yourshop.com   →   https://gtm.yourshop.com/gtm.js?id=GTM-XXXXXXX
 
 Only `https` addresses without query parameters are accepted. An invalid entry is discarded server-side and the container loads from Google again – otherwise the loading address would point nowhere and nothing would be tracked at all. The admin UI blocks saving it as well.
 
-That is all the plugin does. Whether the measurement hits also travel via your domain depends on what sits behind that address – a real GTM server container or a reverse proxy – and how the tags inside the container are configured. Setting up such an endpoint on the shop hosting is described in [`docs/server-side-tagging-proxy.md`](docs/server-side-tagging-proxy.md) (German).
-
-Consent is unaffected: even via your own domain the container only loads after consent, and the data still goes to Google – just with your server in between.
+Whether the measurement hits also travel via your domain depends on what sits behind that address – a real GTM server container or a reverse proxy – and how the tags inside the container are configured. Setting up such an endpoint on the shop hosting is described in [`docs/server-side-tagging-proxy.md`](docs/server-side-tagging-proxy.md) (German).
 
 ## External consent managers (CMP)
 

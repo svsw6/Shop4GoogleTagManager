@@ -21,8 +21,6 @@ class ConfigService
         'trackContactForm' => false,
         'trackNewsletter' => true,
         'trackCustomForms' => false,
-        // aus: ein `search`-event ohne search_term hat keinen aussagewert, und der
-        // selbst eingegebene suchbegriff ist fuer sich kein personenbezogenes datum
         'anonymizeSearchTerm' => false,
         'advancedConsentMode' => false,
         'eagerCheckoutLoad' => false,
@@ -177,10 +175,6 @@ class ConfigService
         return is_string($value) && in_array($value, $allowed, true) ? $value : $default;
     }
 
-    /**
-     * Eine ungueltige URL wird verworfen statt uebernommen: sonst liefe der Container-Load
-     * gegen eine kaputte Adresse und das Tracking waere komplett still.
-     */
     private function getServerContainerUrl(?string $salesChannelId): string
     {
         $value = rtrim(trim($this->systemConfigService->getString(self::PREFIX . 'serverContainerUrl', $salesChannelId)), '/');

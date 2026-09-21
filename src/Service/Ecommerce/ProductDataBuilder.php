@@ -85,9 +85,6 @@ class ProductDataBuilder
         return new DataLayerEvent('search', $data);
     }
 
-    /**
-     * Einstiegskategorie des Verkaufskanals - alles darueber gehoert nicht in den Kategoriepfad.
-     */
     private function rootCategoryId(SalesChannelContext $context): string
     {
         return $context->getSalesChannel()->getNavigationCategoryId();

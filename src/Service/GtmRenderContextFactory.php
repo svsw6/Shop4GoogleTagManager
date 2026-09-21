@@ -53,10 +53,6 @@ class GtmRenderContextFactory
     }
 
     /**
-     * Bereits per Cookie erteilte Zwecke duerfen nur dann in den `consent default` wandern,
-     * wenn die Antwort garantiert nicht im HTTP-Cache landet. Sonst koennte eine fuer einen
-     * einwilligenden Besucher gerenderte Seite jemandem ausgeliefert werden, der abgelehnt hat.
-     *
      * @return list<string>
      */
     private function resolveServerSideGrants(Request $request, ?string $salesChannelId): array
@@ -82,10 +78,6 @@ class GtmRenderContextFactory
         return $this->consentService->resolveGrantedConsentKeys($request->cookies->all(), $salesChannelId) !== [];
     }
 
-    /**
-     * Ohne kundenbezogene Felder und ohne Enhanced Conversions liefert der Endpunkt
-     * garantiert ein leeres Objekt - dann gar nicht erst anfragen.
-     */
     private function hasUserData(PluginConfig $config): bool
     {
         return $config->customerTracking

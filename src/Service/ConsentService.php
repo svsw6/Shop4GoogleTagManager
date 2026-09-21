@@ -14,7 +14,7 @@ class ConsentService
     }
 
     /**
-     * @param list<string> $grantedKeys bereits per cookie erteilte consent-zwecke
+     * @param list<string> $grantedKeys
      *
      * @return array<string, string|int>
      */
@@ -37,9 +37,6 @@ class ConsentService
             'security_storage' => 'granted',
         ];
 
-        // bereits erteilte einwilligungen direkt im default anheben: sonst feuert gtm.js
-        // erst cookielos und wartet auf das consent-update aus dem storefront-bundle.
-        // der aufrufer muss sicherstellen, dass die seite nicht im http-cache landet.
         foreach ($grantedKeys as $key) {
             if (isset($state[$key])) {
                 $state[$key] = 'granted';
@@ -52,7 +49,7 @@ class ConsentService
     }
 
     /**
-     * @return array<string, list<string>> cookie-name => consent-zwecke
+     * @return array<string, list<string>>
      */
     public function getCookieConsentMapping(?string $salesChannelId = null): array
     {
@@ -63,8 +60,6 @@ class ConsentService
         ];
 
         if ($config->remarketing) {
-            // ad_user_data gehoert zum marketing-zweck: consent mode v2 verlangt das signal
-            // fuer die ganz normale ads-conversion-messung, nicht erst fuer enhanced conversions
             $mapping[self::COOKIE_MARKETING] = [
                 'ad_storage',
                 'ad_user_data',
@@ -74,16 +69,12 @@ class ConsentService
         }
 
         if ($config->enhancedConversionsEnabled()) {
-            // eigener opt-in nur fuer die uebermittlung gehashter kundendaten
             $mapping[self::COOKIE_ENHANCED] = ['ad_user_data'];
         }
 
         return $mapping;
     }
 
-    /**
-     * Cookie-Name, hinter dem die Uebermittlung gehashter Kundendaten haengt.
-     */
     public function getEnhancedConversionsCookie(?string $salesChannelId = null): ?string
     {
         return $this->configService->getConfig($salesChannelId)->enhancedConversionsEnabled()

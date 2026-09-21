@@ -9,11 +9,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 class PendingEventStore
 {
     private const SESSION_KEY = 's4gtm_pending_events';
-
-    /**
-     * Hinweis-Flag fuer das Storefront-JS. Steht bewusst im Cookie und nicht nur im HTML,
-     * weil das HTML aus dem HTTP-Cache stammen kann.
-     */
     public const FLAG_COOKIE = 's4gtm-pending';
 
     public function __construct(

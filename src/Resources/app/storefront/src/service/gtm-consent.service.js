@@ -10,7 +10,6 @@ export default class GtmConsentService {
         this._sendConsentSignals = config.sendConsentSignals === true;
         this._externalCmpBridge = config.externalCmpBridge === true;
         this._containerId = config.containerId;
-        // eigener server-container oder googletagmanager.com
         this._scriptOrigin = config.scriptOrigin || 'https://www.googletagmanager.com';
         this._tagInBody = config.tagInBody === true;
         this._cspNonce = this._resolveNonce();
@@ -19,7 +18,6 @@ export default class GtmConsentService {
         this._userDataUrl = config.userDataUrl || '';
 
         this._ecEnabled = typeof config.enhancedConversions === 'string' && config.enhancedConversions !== 'off';
-        // eigener opt-in fuer gehashte kundendaten; ad_user_data haengt am marketing-haken
         this._ecCookieName = config.enhancedConversionsCookie || '';
 
         this._grantedAnalytics = false;
@@ -46,11 +44,6 @@ export default class GtmConsentService {
         ) || '';
     }
 
-    /**
-     * Seiten-Events duerfen erst raus, wenn der Container geladen ist UND feststeht, ob noch
-     * user/enhancedConversion in den dataLayer kommen. Sonst feuert GTM das Conversion-Tag,
-     * bevor die zugehoerigen dataLayer-Variablen ueberhaupt existieren.
-     */
     onReady(callback) {
         if (this._isReady()) {
             callback();
@@ -113,7 +106,6 @@ export default class GtmConsentService {
             return;
         }
 
-        // ohne shopware-banner setzt niemand sonst die gate-cookies, die der server auswertet
         this._syncGateCookies(state);
         this._apply(state, state.ad_user_data === 'granted', anyGranted);
     }
@@ -154,9 +146,6 @@ export default class GtmConsentService {
             });
         });
 
-        // die gate-cookies setzt shopwares cookie-configuration-plugin selbst, weil sie dort als
-        // regulaere cookie-eintraege registriert sind. hier nachzusetzen wuerde bei
-        // teil-einwilligungen zu viel freischalten (marketing -> ad_user_data -> ec-cookie).
         this._apply(state, updated[this._ecCookieName] === true, anyGranted);
     }
 
@@ -207,7 +196,6 @@ export default class GtmConsentService {
             return;
         }
 
-        // ohne endpunkt gibt es nichts nachzuladen (kunden-, user-id-tracking und EC alle aus)
         if (!this._userDataUrl) {
             this._settleUserData();
 
@@ -274,7 +262,6 @@ export default class GtmConsentService {
 
         this._userDataTimer = window.setTimeout(() => {
             this._userDataTimer = null;
-            // der request darf weiterlaufen, die seiten-events warten nur nicht mehr auf ihn
             this._settleUserData();
         }, USER_DATA_TIMEOUT);
     }

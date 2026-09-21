@@ -24,8 +24,6 @@ class CookieProvider implements CookieProviderInterface
 
         $config = $this->configService->getConfig($this->resolveSalesChannelId());
         $remarketing = $config->remarketing;
-        // eigener haken nur, wenn wirklich gehashte kundendaten uebermittelt werden;
-        // das consent-mode-signal ad_user_data haengt am marketing-haken
         $enhanced = $config->enhancedConversionsEnabled();
 
         foreach ($groups as &$group) {

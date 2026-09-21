@@ -210,9 +210,7 @@ https://gtm.deinshop.de   →   https://gtm.deinshop.de/gtm.js?id=GTM-XXXXXXX
 
 Akzeptiert werden nur `https`-Adressen ohne Query-Parameter. Eine ungültige Eingabe wird serverseitig verworfen und der Container lädt wieder von Google – sonst zeigt die Ladeadresse ins Leere und es wird gar nichts mehr getrackt. Das Admin-UI blockiert das Speichern zusätzlich.
 
-Mehr macht das Plugin nicht. Ob auch die Messhits über deine Domain laufen, hängt davon ab, was hinter der Adresse steht – ein echter GTM-Server-Container oder ein Reverse Proxy – und wie die Tags im Container konfiguriert sind. Wie du so einen Endpunkt auf dem Hosting des Shops einrichtest, steht in [`docs/server-side-tagging-proxy.md`](docs/server-side-tagging-proxy.md).
-
-Am Consent ändert sich nichts: Der Container lädt auch über die eigene Domain erst nach Einwilligung, und die Daten gehen weiterhin an Google – nur mit deinem Server dazwischen.
+Ob auch die Messhits über deine Domain laufen, hängt davon ab, was hinter der Adresse steht – ein echter GTM-Server-Container oder ein Reverse Proxy – und wie die Tags im Container konfiguriert sind. Wie du so einen Endpunkt auf dem Hosting des Shops einrichtest, steht in [`docs/server-side-tagging-proxy.md`](docs/server-side-tagging-proxy.md).
 
 ## Externe Consent-Manager (CMP)
 
